@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CaloriEat</title>
+
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+  <div class="header-top-row">
+    <div class="header-left">
+      <h1>CaloriEat</h1>
+    </div>
+
+    <div class="menu-icon" id="menuIcon">☰</div>
+    <div class="dropdown" id="menuDropdown">
+      <a href="#" id="menuHome">Home</a>
+      <a href="#" id="menuDashboard">Dashboard</a>
+      <a href="#" id="menuAccount">Account</a>
+      <a href="#" id="menuHelp">Help</a>
+      <a href="#" id="menuContact">Contact</a>
+      <a href="#" id="menuLogout">Logout</a>
+    </div>
+  </div>
+
+  <!-- NEW clickable links row INSIDE the blue header -->
+  <div class="header-links-row">
+    <span class="header-link" id="linkGoals">Set Goals</span>
+    <span class="header-link" id="linkMeals">Add Meals</span>
+    <span class="header-link" id="linkWeighIn">Weigh In</span>
+  </div>
+</header>
+
+  <!-- LOGIN SECTION -->
+  <div class="container" id="loginSection">
+    <h2>Login</h2>
+    <div id="errorPopup">Username/Password does not exist</div>
+
+    <label for="username">Username:</label>
+    <input type="text" id="username" placeholder="e.g., JohnDoe">
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" placeholder="Enter your password">
+
+    <button id="loginBtn">Login</button>
+
+    <div class="forgot-link">
+      <a href="#" id="forgotLink">Forgot Username or Password?</a>
+    </div>
+
+    <div class="signup-link">
+      <p>Don't have an account? <a href="#" id="signUpLink">Sign Up</a></p>
+    </div>
+  </div>
+
+  <!-- RESET POPUP -->
+  <div id="resetPopup" class="hidden popup-card">
+    <h3>Reset Credentials</h3>
+    <p>If you forgot your username or password, click the link below to reset them.</p>
+    <p><a href="#" id="resetLink">Reset Username / Password</a></p>
+    <button id="closeResetPopup" class="btn-close">Close</button>
+  </div>
+
+  <!-- SIGN UP / PROFILE SETUP SECTION -->
+  <div class="container hidden" id="profileSection">
+    <h2>Hello! Let's Set Up Your Account!</h2>
+
+    <div id="signupError" style="
+      display:none;
+      background:#a10000;
+      color:#fff;
+      padding:10px;
+      text-align:center;
+      border-radius:8px;
+      margin-bottom:10px;
+      font-weight:bold;
+      font-size:0.9rem;">
+      <!-- error text goes here -->
+    </div>
+
+    <label for="setupUsername">Username:</label>
+    <input type="text" id="setupUsername" placeholder="Create a username">
+
+    <label for="setupEmail">Email:</label>
+    <input type="email" id="setupEmail" placeholder="Enter your email">
+
+    <label for="setupPassword">Password:</label>
+    <input type="password" id="setupPassword" placeholder="Create a password">
+
+    <label for="birthdateSignup">Birthdate:</label>
+    <input type="date" id="birthdateSignup">
+
+    <label for="heightFtIn">Height (ft/in, e.g. 6'1&quot; or 5 11 or 62 for 6'2&quot;):</label>
+    <input type="text" id="heightFtIn" placeholder="6'1&quot; or 5 11 or 62">
+
+    <label for="weightLbs">Weight (lbs):</label>
+    <input type="number" id="weightLbs" placeholder="e.g., 185" step="0.1">
+
+    <label for="Gender">Gender:</label>
+    <select id="Gender">
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+
+    <button id="saveProfileBtn">Save Profile</button>
+
+    <div class="forgot-link">
+  <a href="#" id="backToLoginLink">Back to Login</a>
+</div>
+
+  </div>
+
+  <!-- HOME / APP SECTION -->
+  <div class="container hidden" id="appSection">
+    <h2 id="welcomeMsg"></h2>
+
+    <!-- GOAL -->
+    <h2>Set Your Goal</h2>
+    <label for="goal">Diet Goal:</label>
+    <select id="goal">
+      <option value="maintain">Maintain Weight</option>
+      <option value="lose">Lose Weight</option>
+      <option value="gain">Gain Weight</option>
+    </select>
+
+    <label for="targetCalories">Target Daily Calories:</label>
+    <input type="number" id="targetCalories" placeholder="e.g., 2000">
+    <button id="saveGoalBtn">Save Goal</button>
+
+    <!-- DAILY TARGETS -->
+    <div class="targets-box">
+      <h3>Daily Targets (Macros & Veggies)</h3>
+      <div class="targets-grid">
+        <div>
+          <label for="proteinTarget">Protein Target (g):</label>
+          <input type="number" id="proteinTarget" placeholder="150">
+        </div>
+        <div>
+          <label for="carbsTarget">Carbs Target (g):</label>
+          <input type="number" id="carbsTarget" placeholder="200">
+        </div>
+        <div>
+          <label for="fatTarget">Fat Target (g):</label>
+          <input type="number" id="fatTarget" placeholder="70">
+        </div>
+        <div>
+          <label for="veggiesTarget">Veggies Target (servings):</label>
+          <input type="number" id="veggiesTarget" placeholder="5">
+        </div>
+      </div>
+      <button id="saveTargetsBtn">Save Targets</button>
+    </div>
+
+    <!-- ADD MEAL -->
+    <h2>Add Meal</h2>
+
+    <label for="meal">Meal Name:</label>
+    <input type="text" id="meal" placeholder="e.g., Chicken Salad">
+
+    <label for="foodSearch">Search Food:</label>
+    <input type="text" id="foodSearch" placeholder="Search food (e.g., Apple, Rice, Burger)">
+    <ul id="foodResults"></ul>
+
+    <label for="calories">Calories:</label>
+    <input type="number" id="calories" placeholder="e.g., 350">
+
+    <div class="inline-grid-3col">
+      <div>
+        <label for="protein">Protein (g):</label>
+        <input type="number" id="protein" placeholder="e.g., 30">
+      </div>
+      <div>
+        <label for="carbs">Carbs (g):</label>
+        <input type="number" id="carbs" placeholder="e.g., 45">
+      </div>
+      <div>
+        <label for="fat">Fat (g):</label>
+        <input type="number" id="fat" placeholder="e.g., 10">
+      </div>
+    </div>
+
+    <div>
+      <label for="veggies">Veggie Servings:</label>
+      <input type="number" id="veggies" placeholder="e.g., 1">
+    </div>
+
+    <button id="addMealBtn">Add Meal</button>
+
+    <!-- WEIGH IN -->
+    <div class="row-inline-2col">
+      <div>
+        <h3>Weigh In</h3>
+        <label for="weighInLbs">Today's Weight (lbs):</label>
+        <input type="number" id="weighInLbs" placeholder="e.g., 184.5" step="0.1">
+        <button id="addWeighInBtn">Save Weigh In</button>
+      </div>
+    </div>
+
+    <h4>Meals</h4>
+      <div id="mealList"></div>
+
+  </div>
+
+  <!-- DASHBOARD SECTION -->
+  <div class="container hidden" id="dashboardSection">
+    <h2>Dashboard</h2>
+
+    <!-- SUMMARY -->
+    <div class="summary">
+      <h3>Today's Summary</h3>
+      <p id="userDisplay"></p>
+      <p id="profileDisplay"></p>
+
+      <p id="goalDisplay">Goal: Not Set</p>
+      <p id="totalCalories">Total Calories: 0</p>
+      <p id="remainingCalories">Remaining Calories: -</p>
+    </div>
+
+    <div class="rings-wrapper">
+      <div class="ring-card">
+        <canvas id="ringCalories" class="ringCanvas" width="100" height="100"></canvas>
+        <div class="ring-label">Calories</div>
+        <div class="ring-desc" id="ringCaloriesText"></div>
+      </div>
+
+      <div class="ring-card">
+        <canvas id="ringProtein" class="ringCanvas" width="100" height="100"></canvas>
+        <div class="ring-label">Protein</div>
+        <div class="ring-desc" id="ringProteinText"></div>
+      </div>
+
+      <div class="ring-card">
+        <canvas id="ringCarbs" class="ringCanvas" width="100" height="100"></canvas>
+        <div class="ring-label">Carbs</div>
+        <div class="ring-desc" id="ringCarbsText"></div>
+      </div>
+
+      <div class="ring-card">
+        <canvas id="ringFat" class="ringCanvas" width="100" height="100"></canvas>
+        <div class="ring-label">Fat</div>
+        <div class="ring-desc" id="ringFatText"></div>
+      </div>
+
+      <div class="ring-card">
+        <canvas id="ringVeggies" class="ringCanvas" width="100" height="100"></canvas>
+        <div class="ring-label">Veggies</div>
+        <div class="ring-desc" id="ringVeggiesText"></div>
+      </div>
+    </div>
+
+    <canvas id="calorieChart" class="chartCanvas" width="400" height="200"></canvas>
+    <canvas id="weightChart" class="chartCanvas" width="400" height="200"></canvas>
+  </div>
+
+  <!-- ACCOUNT SECTION -->
+  <div class="container hidden" id="accountSection">
+    <h2>Your Account</h2>
+
+    <label for="acctDisplayName">Display Name:</label>
+    <input type="text" id="acctDisplayName" placeholder="Name shown in the app">
+
+    <label for="acctEmail">Email:</label>
+    <input type="email" id="acctEmail" placeholder="Email">
+
+    <label for="acctBirthdate">Birthdate:</label>
+    <input type="date" id="acctBirthdate">
+
+    <label for="acctHeightFtIn">Height (ft/in):</label>
+    <input type="text" id="acctHeightFtIn" placeholder="6'1&quot; or 5 11 or 62">
+
+    <label for="acctWeightLbs">Weight (lbs):</label>
+    <input type="number" id="acctWeightLbs" step="0.1" placeholder="e.g., 184.5">
+
+    <label for="acctGender">Gender:</label>
+    <select id="acctGender">
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+
+    <button id="saveAccountBtn">Update Profile</button>
+
+    <button id="clearDataBtn" style="background:#8b0000; border:1px solid #aa0000;">
+    Clear My Logged Data (meals / weigh-ins)
+    </button>
+
+    <p class="note">Note: Username / password changes are not supported in this demo.</p>
+  </div>
+
+  <!-- HELP SECTION -->
+  <div class="container hidden" id="helpSection">
+    <h2>Help Page</h2>
+    <ul>
+      <li>Set calorie & macro goals.</li>
+      <li>Log meals with calories, protein, carbs, fat, and veggie servings.</li>
+      <li>Log weight in lbs.</li>
+      <li>See daily progress rings + charts on Dashboard.</li>
+      <li>Update your profile any time under Account.</li>
+    </ul>
+  </div>
+
+  <!-- CONTACT SECTION -->
+  <div class="container hidden" id="contactSection">
+    <h2>Contact Us</h2>
+    <label for="contactName">Name:</label>
+    <input type="text" id="contactName">
+
+    <label for="contactEmail">Email:</label>
+    <input type="email" id="contactEmail">
+
+    <label for="contactMessage">Message:</label>
+    <textarea id="contactMessage" rows="4"></textarea>
+
+    <button id="sendMessageBtn">Send Message</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
