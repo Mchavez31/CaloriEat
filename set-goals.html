@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Set Goals</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-top-row">
+      <div class="header-left">
+        <h1>CaloriEat</h1>
+      </div>
+
+      <div class="menu-icon" id="menuIcon" style="display: block;">☰</div>
+      <div class="dropdown" id="menuDropdown">
+        <a href="Index_Modular.html" id="menuDashboard">Dashboard</a>
+        <a href="Index_Modular.html?page=account" id="menuAccount">Account</a>
+        <a href="Index_Modular.html?page=help" id="menuHelp">Help</a>
+        <a href="Index_Modular.html?page=contact" id="menuContact">Contact</a>
+        <a href="#" id="menuLogout">Logout</a>
+      </div>
+    </div>
+
+    <div class="header-links-row" style="display: flex;">
+      <a class="header-link" href="set-goals.html">Set Goals</a>
+      <a class="header-link" href="add-meal.html">Add Meals</a>
+      <a class="header-link" href="weigh-in.html">Weigh In</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Set Your Goals</h2>
+
+    <!-- CALORIE GOAL -->
+    <h3>Daily Calorie Goal</h3>
+    <label for="goal">Diet Goal:</label>
+    <select id="goal">
+      <option value="maintain">Maintain Weight</option>
+      <option value="lose">Lose Weight</option>
+      <option value="gain">Gain Weight</option>
+    </select>
+
+    <label for="targetCalories">Target Daily Calories:</label>
+    <input type="number" id="targetCalories" placeholder="e.g., 2000">
+    <button id="saveGoalBtn">Save Calorie Goal</button>
+
+    <!-- DAILY TARGETS -->
+    <div class="targets-box">
+      <h3>Daily Targets (Macros & Veggies)</h3>
+      <div class="targets-grid">
+        <div>
+          <label for="proteinTarget">Protein Target (g):</label>
+          <input type="number" id="proteinTarget" placeholder="150">
+        </div>
+        <div>
+          <label for="carbsTarget">Carbs Target (g):</label>
+          <input type="number" id="carbsTarget" placeholder="200">
+        </div>
+        <div>
+          <label for="fatTarget">Fat Target (g):</label>
+          <input type="number" id="fatTarget" placeholder="70">
+        </div>
+        <div>
+          <label for="sugarTarget">Sugar Target (g):</label>
+          <input type="number" id="sugarTarget" placeholder="50">
+        </div>
+        <div>
+          <label for="veggiesTarget">Veggies Target (servings):</label>
+          <input type="number" id="veggiesTarget" placeholder="5">
+        </div>
+      </div>
+      <button id="saveTargetsBtn">Save Macro Targets</button>
+    </div>
+
+    <!-- CURRENT GOALS DISPLAY -->
+    <div class="summary">
+      <h3>Your Current Goals</h3>
+      <p id="currentGoalDisplay">Loading...</p>
+    </div>
+  </main>
+
+  <script src="standalone-goals.js"></script>
+</body>
+</html>

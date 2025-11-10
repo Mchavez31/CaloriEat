@@ -1,7 +1,8 @@
 /********************************
  * STATE
  ********************************/
-let currentUser = null;
+let currentUser = localStorage.getItem('currentUser') || null;
+
 let profiles = JSON.parse(localStorage.getItem('profiles')) || {};
 let userGoal = { type: 'maintain', target: 2000 };
 
@@ -25,29 +26,26 @@ const sections = {
   contact: document.getElementById('contactSection')
 };
 
-// nav/menu
 const menuIcon = document.getElementById('menuIcon');
 const menuDropdown = document.getElementById('menuDropdown');
 const menuHome = document.getElementById('menuHome');
 const menuDashboard = document.getElementById('menuDashboard');
+const menuMeals = document.getElementById('menuMeals');
 const menuAccount = document.getElementById('menuAccount');
 const menuHelp = document.getElementById('menuHelp');
 const menuContact = document.getElementById('menuContact');
 const menuLogout = document.getElementById('menuLogout');
 
-// login
 const loginBtn = document.getElementById('loginBtn');
 const usernameInput = document.getElementById('username');
 const passwordInput = document.getElementById('password');
 const errorPopup = document.getElementById('errorPopup');
 
-// forgot/reset
 const forgotLink = document.getElementById('forgotLink');
 const resetPopup = document.getElementById('resetPopup');
 const closeResetPopup = document.getElementById('closeResetPopup');
 const resetLink = document.getElementById('resetLink');
 
-// signup
 const signUpLink = document.getElementById('signUpLink');
 const saveProfileBtn = document.getElementById('saveProfileBtn');
 const setupUsername = document.getElementById('setupUsername');
@@ -56,70 +54,64 @@ const setupPassword = document.getElementById('setupPassword');
 const birthdateSignup = document.getElementById('birthdateSignup');
 const heightFtInInput = document.getElementById('heightFtIn');
 const weightLbsInput = document.getElementById('weightLbs');
-const genderInput = document.getElementById('gender'); // "gender" after rename
+const genderInput = document.getElementById('gender');
 const signupErrorBox = document.getElementById('signupError');
 const backToLoginLink = document.getElementById('backToLoginLink');
 
-// app/home
 const welcomeMsg = document.getElementById('welcomeMsg');
 const goalSelect = document.getElementById('goal');
 const targetCaloriesInput = document.getElementById('targetCalories');
 const saveGoalBtn = document.getElementById('saveGoalBtn');
 
-// macro targets
 const proteinTargetInput = document.getElementById('proteinTarget');
 const carbsTargetInput = document.getElementById('carbsTarget');
 const fatTargetInput = document.getElementById('fatTarget');
+const sugarTargetInput = document.getElementById('sugarTarget');
 const veggiesTargetInput = document.getElementById('veggiesTarget');
 const saveTargetsBtn = document.getElementById('saveTargetsBtn');
 
-// meal inputs
 const mealInput = document.getElementById('meal');
 const calInput = document.getElementById('calories');
 const proteinInput = document.getElementById('protein');
 const carbsInput = document.getElementById('carbs');
 const fatInput = document.getElementById('fat');
+const sugarInput = document.getElementById('sugar');
 const veggiesInput = document.getElementById('veggies');
 const addMealBtn = document.getElementById('addMealBtn');
 const mealList = document.getElementById('mealList');
 
-// summary
 const totalCalories = document.getElementById('totalCalories');
 const remainingCalories = document.getElementById('remainingCalories');
 const goalDisplay = document.getElementById('goalDisplay');
 const userDisplay = document.getElementById('userDisplay');
 const profileDisplay = document.getElementById('profileDisplay');
 
-// weigh in
 const weighInLbsInput = document.getElementById('weighInLbs');
 const addWeighInBtn = document.getElementById('addWeighInBtn');
 
-// food search
 const foodSearch = document.getElementById('foodSearch');
 const foodResults = document.getElementById('foodResults');
 
-// contact
 const sendMessageBtn = document.getElementById('sendMessageBtn');
 
-// header action links
 const linkGoals = document.getElementById('linkGoals');
 const linkMeals = document.getElementById('linkMeals');
 const linkWeighIn = document.getElementById('linkWeighIn');
 
-// dashboard rings + text
 const ringCaloriesCanvas = document.getElementById('ringCalories');
 const ringProteinCanvas = document.getElementById('ringProtein');
 const ringCarbsCanvas = document.getElementById('ringCarbs');
 const ringFatCanvas = document.getElementById('ringFat');
+const ringSugarCanvas = document.getElementById('ringSugar');
 const ringVeggiesCanvas = document.getElementById('ringVeggies');
 
 const ringCaloriesText = document.getElementById('ringCaloriesText');
 const ringProteinText = document.getElementById('ringProteinText');
 const ringCarbsText = document.getElementById('ringCarbsText');
 const ringFatText = document.getElementById('ringFatText');
+const ringSugarText = document.getElementById('ringSugarText');
 const ringVeggiesText = document.getElementById('ringVeggiesText');
 
-// account form
 const acctDisplayNameInput = document.getElementById('acctDisplayName');
 const acctEmailInput = document.getElementById('acctEmail');
 const acctBirthdateInput = document.getElementById('acctBirthdate');
@@ -130,7 +122,7 @@ const saveAccountBtn = document.getElementById('saveAccountBtn');
 const clearDataBtn = document.getElementById('clearDataBtn');
 
 /********************************
- * MENU VISIBILITY HELPER
+ * MENU VISIBILITY HELPER - WITH FIX
  ********************************/
 function updateMenuVisibility() {
   const loggedIn = !!currentUser;
@@ -139,59 +131,67 @@ function updateMenuVisibility() {
   const menuDropdownEl = document.getElementById('menuDropdown');
   const headerLinksRow = document.querySelector('.header-links-row');
 
-  // Show/hide hamburger icon
   if (menuIconEl) {
     menuIconEl.style.display = loggedIn ? "block" : "none";
+    menuIconEl.style.visibility = loggedIn ? "visible" : "hidden";
   }
 
-  // Always keep dropdown hidden until user clicks the icon
   if (menuDropdownEl) {
     menuDropdownEl.style.display = "none";
   }
 
-  // Show/hide the three header links ("Set Goals", "Add Meals", "Weigh In")
   if (headerLinksRow) {
     headerLinksRow.style.display = loggedIn ? "flex" : "none";
+    headerLinksRow.style.visibility = loggedIn ? "visible" : "hidden";
   }
 
-  // Show/hide Account and Logout in dropdown
   if (menuAccount) menuAccount.style.display = loggedIn ? "block" : "none";
-  if (menuLogout)  menuLogout.style.display = loggedIn ? "block" : "none";
+  if (menuLogout) menuLogout.style.display = loggedIn ? "block" : "none";
+  
+ const menuDashboardEl = document.getElementById('menuDashboard');
+if (menuDashboardEl) menuDashboardEl.style.display = loggedIn ? "block" : "none";
 }
 
 /********************************
  * GENERAL HELPERS
  ********************************/
 function showSection(sectionEl) {
-  Object.values(sections).forEach(s => s.classList.add('hidden'));
-  sectionEl.classList.remove('hidden');
+  Object.values(sections).forEach(s => {
+    if (s) s.classList.add('hidden');
+  });
+  if (sectionEl) sectionEl.classList.remove('hidden');
   if (menuDropdown) menuDropdown.style.display = 'none';
 }
 
+window.sections = sections;
+window.showSection = showSection;
+window.updateMenuVisibility = updateMenuVisibility;
+window.renderMeals = renderMeals;
+window.renderDashboardRings = renderDashboardRings;
+window.renderCharts = renderCharts;
+window.showApp = showApp;
+
 function clearProfileSetupFields() {
-  setupUsername.value = '';
-  setupEmail.value = '';
-  setupPassword.value = '';
-  birthdateSignup.value = '';
-  heightFtInInput.value = '';
-  weightLbsInput.value = '';
+  if (setupUsername) setupUsername.value = '';
+  if (setupEmail) setupEmail.value = '';
+  if (setupPassword) setupPassword.value = '';
+  if (birthdateSignup) birthdateSignup.value = '';
+  if (heightFtInInput) heightFtInInput.value = '';
+  if (weightLbsInput) weightLbsInput.value = '';
   if (genderInput) genderInput.selectedIndex = 0;
 }
 
-// parse height like 6'1", 6 1, or 72
 function parseHeightFtIn(raw) {
   if (!raw) return null;
   let txt = raw.toLowerCase().trim();
-  // normalize words to symbols
-  txt = txt.replace(/feet|ft/g, "'");        
+  txt = txt.replace(/feet|ft/g, "'");
   txt = txt.replace(/inches|inch|in/g, '"');
   txt = txt.replace(/\s+/g, ' ');
 
-  // patterns:
-  const mA = txt.match(/^(\d+)'[\s]?(\d+)"?$/);   // 6'1" or 6' 1"
-  const mB = txt.match(/^(\d+)'$/);               // 6'
-  const mC = txt.match(/^(\d+)\s+(\d+)$/);        // 6 1
-  const mD = txt.match(/^(\d+)$/);                // 72
+  const mA = txt.match(/^(\d+)'[\s]?(\d+)"?$/);
+  const mB = txt.match(/^(\d+)'$/);
+  const mC = txt.match(/^(\d+)\s+(\d+)$/);
+  const mD = txt.match(/^(\d+)$/);
 
   if (mA) {
     const feet = +mA[1];
@@ -239,27 +239,28 @@ if (menuIcon) {
   });
 }
 
-// close dropdown if you click outside
 document.addEventListener('click', () => {
   if (menuDropdown) menuDropdown.style.display = 'none';
 });
 
-if (menuHome) {
-  menuHome.addEventListener('click', () => {
-    showApp(); // dashboard is now home
-    if (menuDropdown) menuDropdown.style.display = 'none';
-  });
-}
-
 if (menuDashboard) {
-  menuDashboard.addEventListener('click', () => {
+  menuDashboard.addEventListener('click', (e) => {
+    e.preventDefault();
     showApp();
     if (menuDropdown) menuDropdown.style.display = 'none';
   });
 }
 
+if (menuMeals) {
+  menuMeals.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.location.href = 'add-meal.html';
+  });
+}
+
 if (menuAccount) {
-  menuAccount.addEventListener('click', () => {
+  menuAccount.addEventListener('click', (e) => {
+    e.preventDefault();
     showSection(sections.account);
     loadAccountForm();
     if (menuDropdown) menuDropdown.style.display = 'none';
@@ -267,47 +268,47 @@ if (menuAccount) {
 }
 
 if (menuHelp) {
-  menuHelp.addEventListener('click', () => {
+  menuHelp.addEventListener('click', (e) => {
+    e.preventDefault();
     showSection(sections.help);
     if (menuDropdown) menuDropdown.style.display = 'none';
   });
 }
 
 if (menuContact) {
-  menuContact.addEventListener('click', () => {
+  menuContact.addEventListener('click', (e) => {
+    e.preventDefault();
     showSection(sections.contact);
     if (menuDropdown) menuDropdown.style.display = 'none';
   });
 }
 
 if (menuLogout) {
-  menuLogout.addEventListener('click', () => {
+  menuLogout.addEventListener('click', (e) => {
+    e.preventDefault();
     doLogout();
     if (menuDropdown) menuDropdown.style.display = 'none';
   });
 }
 
-// "Set Goals" in the blue header
 if (linkGoals) {
-  linkGoals.addEventListener('click', () => {
-    showSection(sections.app);
-    loadTargetsUI();
+  linkGoals.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.location.href = 'set-goals.html';
   });
 }
 
-// "Add Meals" in the blue header
 if (linkMeals) {
-  linkMeals.addEventListener('click', () => {
-    showSection(sections.app);
-    renderMeals();
+  linkMeals.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.location.href = 'add-meal.html';
   });
 }
 
-// "Weigh In" in the blue header
 if (linkWeighIn) {
-  linkWeighIn.addEventListener('click', () => {
-    showSection(sections.app);
-    renderMeals();
+  linkWeighIn.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.location.href = 'weigh-in.html';
   });
 }
 
@@ -322,11 +323,36 @@ if (loginBtn) {
     if (profiles[username] && profiles[username].password === pwd) {
       currentUser = username;
       localStorage.setItem('currentUser', currentUser);
-      if (profiles[currentUser].goal) {
-        userGoal = profiles[currentUser].goal;
+      if (profiles[currentUser].goal) userGoal = profiles[currentUser].goal;
+
+      // Force show header IMMEDIATELY before showApp
+      const menuIconEl = document.getElementById('menuIcon');
+      const headerLinksRow = document.querySelector('.header-links-row');
+      const headerEl = document.querySelector('header');
+      
+      if (menuIconEl) {
+        menuIconEl.style.display = "block";
+        menuIconEl.style.visibility = "visible";
+        menuIconEl.style.opacity = "1";
       }
-      showApp();               // go to Dashboard
-      updateMenuVisibility();  // <-- make header visible
+      if (headerLinksRow) {
+        headerLinksRow.style.display = "flex";
+        headerLinksRow.style.visibility = "visible";
+        headerLinksRow.style.opacity = "1";
+      }
+      if (headerEl) {
+        headerEl.style.display = "block";
+        headerEl.style.visibility = "visible";
+      }
+
+      // Now show the app
+      showApp();
+      
+      // Update menu visibility again after a delay
+      setTimeout(() => {
+        updateMenuVisibility();
+      }, 100);
+      
       return;
     }
 
@@ -341,10 +367,9 @@ function doLogout() {
   if (usernameInput) usernameInput.value = '';
   if (passwordInput) passwordInput.value = '';
   showSection(sections.login);
-  updateMenuVisibility();   // <-- hide header
+  updateMenuVisibility();
 }
 
-// forgot/reset popup
 if (forgotLink) {
   forgotLink.addEventListener('click', (e) => {
     e.preventDefault();
@@ -368,7 +393,6 @@ if (resetLink) {
   });
 }
 
-// go to sign up
 if (signUpLink) {
   signUpLink.addEventListener('click', (e) => {
     e.preventDefault();
@@ -379,7 +403,6 @@ if (signUpLink) {
   });
 }
 
-// back to login from sign up
 if (backToLoginLink) {
   backToLoginLink.addEventListener('click', (e) => {
     e.preventDefault();
@@ -387,10 +410,8 @@ if (backToLoginLink) {
   });
 }
 
-// save profile on sign up
 if (saveProfileBtn) {
   saveProfileBtn.addEventListener('click', () => {
-    // reset error UI
     if (signupErrorBox) {
       signupErrorBox.style.display = 'none';
       signupErrorBox.textContent = '';
@@ -404,7 +425,6 @@ if (saveProfileBtn) {
     const weightVal = weightLbsInput.value.trim();
     const genderVal = genderInput ? genderInput.value : "";
 
-    // Required fields
     if (!username || !email || !pwd) {
       if (signupErrorBox) {
         signupErrorBox.textContent = 'Please complete username, email, and password.';
@@ -415,7 +435,6 @@ if (saveProfileBtn) {
       return;
     }
 
-    // Duplicate username
     if (profiles[username]) {
       if (signupErrorBox) {
         signupErrorBox.textContent = 'That username is already taken. Please choose a different one.';
@@ -426,9 +445,8 @@ if (saveProfileBtn) {
       return;
     }
 
-    // Height format
     const parsedHeight = parseHeightFtIn(heightVal);
-    if (!parsedHeight) {
+    if (heightVal && !parsedHeight) {
       if (signupErrorBox) {
         signupErrorBox.textContent = "Please enter height like 6'1\", 5 11, or 62 for 6'2\".";
         signupErrorBox.style.display = 'block';
@@ -438,7 +456,6 @@ if (saveProfileBtn) {
       return;
     }
 
-    // Create profile
     profiles[username] = {
       username,
       displayName: username,
@@ -457,11 +474,11 @@ if (saveProfileBtn) {
         proteinTarget: 150,
         carbsTarget: 200,
         fatTarget: 70,
+        sugarTarget: 50,
         veggiesTarget: 5
       }
     };
 
-    // Persist & login
     localStorage.setItem('profiles', JSON.stringify(profiles));
     currentUser = username;
     localStorage.setItem('currentUser', currentUser);
@@ -478,19 +495,12 @@ function loadAccountForm() {
   const u = profiles[currentUser];
   if (!u) return;
 
-  acctDisplayNameInput.value = u.displayName || u.username || '';
-  acctEmailInput.value = u.email || '';
-
-  if (acctBirthdateInput) {
-    acctBirthdateInput.value = u.birthdate || '';
-  }
-
-  acctHeightInput.value = u.height ? formatHeightDisplay(u.height) : '';
-  acctWeightInput.value = (u.weightLbs !== undefined && u.weightLbs !== null)
-    ? u.weightLbs
-    : '';
-
-  acctGenderInput.value = u.gender || 'male';
+  if (acctDisplayNameInput) acctDisplayNameInput.value = u.displayName || u.username || '';
+  if (acctEmailInput) acctEmailInput.value = u.email || '';
+  if (acctBirthdateInput) acctBirthdateInput.value = u.birthdate || '';
+  if (acctHeightInput) acctHeightInput.value = u.height ? formatHeightDisplay(u.height) : '';
+  if (acctWeightInput) acctWeightInput.value = (u.weightLbs !== undefined && u.weightLbs !== null) ? u.weightLbs : '';
+  if (acctGenderInput) acctGenderInput.value = u.gender || 'male';
 }
 
 if (clearDataBtn) {
@@ -501,14 +511,12 @@ if (clearDataBtn) {
       return;
     }
 
-    // wipe meals and weigh-ins, keep profile
     u.meals = [];
     u.weighIns = [];
 
     localStorage.setItem('profiles', JSON.stringify(profiles));
     alert("Your logged data has been cleared.");
 
-    // send them home and refresh summary there
     showApp();
   });
 }
@@ -521,7 +529,6 @@ if (saveAccountBtn) {
       return;
     }
 
-    // read values from Account form safely
     const newDisplayName = acctDisplayNameInput ? acctDisplayNameInput.value.trim() : "";
     const newEmail = acctEmailInput ? acctEmailInput.value.trim() : "";
     const newBirthdate = acctBirthdateInput ? acctBirthdateInput.value.trim() : "";
@@ -529,7 +536,6 @@ if (saveAccountBtn) {
     const newWeight = acctWeightInput ? acctWeightInput.value.trim() : "";
     const newGender = acctGenderInput ? acctGenderInput.value : "";
 
-    // --- height handling ---
     let updatedHeight = u.height;
     if (newHeightRaw !== "") {
       const parsedHeight = parseHeightFtIn(newHeightRaw);
@@ -540,7 +546,6 @@ if (saveAccountBtn) {
       updatedHeight = parsedHeight;
     }
 
-    // --- weight handling ---
     let updatedWeight = u.weightLbs;
     let newWeighInNeeded = false;
     if (newWeight !== "" && !isNaN(parseFloat(newWeight))) {
@@ -551,7 +556,6 @@ if (saveAccountBtn) {
       }
     }
 
-    // --- write updates ---
     u.displayName = newDisplayName || u.displayName || u.username;
     u.email = newEmail || u.email;
     u.birthdate = newBirthdate || u.birthdate || "";
@@ -567,12 +571,10 @@ if (saveAccountBtn) {
       });
     }
 
-    // persist
     localStorage.setItem('profiles', JSON.stringify(profiles));
 
     alert('Profile updated.');
 
-    // go back to Dashboard (now home) and refresh UI
     showApp();
     updateMenuVisibility();
   });
@@ -598,6 +600,7 @@ if (saveGoalBtn) {
       localStorage.setItem('profiles', JSON.stringify(profiles));
     }
 
+    alert('Goal saved successfully!');
     renderMeals();
   });
 }
@@ -605,8 +608,9 @@ if (saveGoalBtn) {
 if (saveTargetsBtn) {
   saveTargetsBtn.addEventListener('click', () => {
     const pT = parseFloat(proteinTargetInput.value) || 0;
-    const cT = parseFloat(carbsTargetInput.value)   || 0;
-    const fT = parseFloat(fatTargetInput.value)     || 0;
+    const cT = parseFloat(carbsTargetInput.value) || 0;
+    const fT = parseFloat(fatTargetInput.value) || 0;
+    const sT = parseFloat(sugarTargetInput.value) || 0;
     const vT = parseFloat(veggiesTargetInput.value) || 0;
 
     const u = profiles[currentUser];
@@ -614,6 +618,7 @@ if (saveTargetsBtn) {
     u.macroGoals.proteinTarget = pT;
     u.macroGoals.carbsTarget = cT;
     u.macroGoals.fatTarget = fT;
+    u.macroGoals.sugarTarget = sT;
     u.macroGoals.veggiesTarget = vT;
 
     localStorage.setItem('profiles', JSON.stringify(profiles));
@@ -625,21 +630,23 @@ function loadTargetsUI() {
   const u = profiles[currentUser];
   if (!u) return;
 
-  if (u.goal) {
+  if (u.goal && goalSelect && targetCaloriesInput) {
     goalSelect.value = u.goal.type || 'maintain';
     targetCaloriesInput.value = u.goal.target || '';
   }
 
   if (!u.macroGoals) {
-    proteinTargetInput.value = '';
-    carbsTargetInput.value = '';
-    fatTargetInput.value = '';
-    veggiesTargetInput.value = '';
+    if (proteinTargetInput) proteinTargetInput.value = '';
+    if (carbsTargetInput) carbsTargetInput.value = '';
+    if (fatTargetInput) fatTargetInput.value = '';
+    if (sugarTargetInput) sugarTargetInput.value = '';
+    if (veggiesTargetInput) veggiesTargetInput.value = '';
   } else {
-    proteinTargetInput.value = u.macroGoals.proteinTarget || '';
-    carbsTargetInput.value = u.macroGoals.carbsTarget || '';
-    fatTargetInput.value = u.macroGoals.fatTarget || '';
-    veggiesTargetInput.value = u.macroGoals.veggiesTarget || '';
+    if (proteinTargetInput) proteinTargetInput.value = u.macroGoals.proteinTarget || '';
+    if (carbsTargetInput) carbsTargetInput.value = u.macroGoals.carbsTarget || '';
+    if (fatTargetInput) fatTargetInput.value = u.macroGoals.fatTarget || '';
+    if (sugarTargetInput) sugarTargetInput.value = u.macroGoals.sugarTarget || '';
+    if (veggiesTargetInput) veggiesTargetInput.value = u.macroGoals.veggiesTarget || '';
   }
 }
 
@@ -651,9 +658,10 @@ if (addMealBtn) {
     const mealName = mealInput.value.trim();
     const mealCalories = parseInt(calInput.value);
     const mealProtein = parseFloat(proteinInput.value) || 0;
-    const mealCarbs   = parseFloat(carbsInput.value)   || 0;
-    const mealFat     = parseFloat(fatInput.value)     || 0;
-    const mealVeg     = parseFloat(veggiesInput.value) || 0;
+    const mealCarbs = parseFloat(carbsInput.value) || 0;
+    const mealFat = parseFloat(fatInput.value) || 0;
+    const mealSugar = parseFloat(sugarInput.value) || 0;
+    const mealVeg = parseFloat(veggiesInput.value) || 0;
 
     if (!mealName || isNaN(mealCalories)) {
       alert('Please enter valid meal info.');
@@ -678,6 +686,7 @@ if (addMealBtn) {
       protein: mealProtein,
       carbs: mealCarbs,
       fat: mealFat,
+      sugar: mealSugar,
       veggies: mealVeg,
       date: todayStr()
     });
@@ -689,9 +698,11 @@ if (addMealBtn) {
     proteinInput.value = '';
     carbsInput.value = '';
     fatInput.value = '';
+    sugarInput.value = '';
     veggiesInput.value = '';
 
     renderMeals();
+    alert('Meal added successfully!');
   });
 }
 
@@ -718,11 +729,11 @@ if (addWeighInBtn) {
     localStorage.setItem('profiles', JSON.stringify(profiles));
     weighInLbsInput.value = '';
 
+    alert('Weight recorded successfully!');
     renderMeals();
   });
 }
 
-// Food search autofill
 if (foodSearch) {
   foodSearch.addEventListener('input', () => {
     const query = foodSearch.value.toLowerCase();
@@ -763,6 +774,7 @@ function buildMealRow(meal, index) {
       P:${meal.protein ?? 0}g |
       C:${meal.carbs ?? 0}g |
       F:${meal.fat ?? 0}g |
+      Sugar:${meal.sugar ?? 0}g |
       Veg:${meal.veggies ?? 0}
     </span>
   `;
@@ -829,9 +841,15 @@ function showMealEditor(row, meal, index) {
       </div>
     </div>
 
-    <div style="margin-top:0.5rem;">
-      <label>Veggies (servings)</label>
-      <input type="number" class="editVeggies" value="${meal.veggies ?? 0}">
+    <div class="inline-grid-2col" style="margin-top:0.5rem;">
+      <div>
+        <label>Sugar (g)</label>
+        <input type="number" class="editSugar" value="${meal.sugar ?? 0}">
+      </div>
+      <div>
+        <label>Veggies (servings)</label>
+        <input type="number" class="editVeggies" value="${meal.veggies ?? 0}">
+      </div>
     </div>
 
     <div class="inline-flex-end">
@@ -847,9 +865,10 @@ function showMealEditor(row, meal, index) {
     const newName = editor.querySelector('.editName').value.trim();
     const newCals = parseInt(editor.querySelector('.editCalories').value);
     const newProtein = parseFloat(editor.querySelector('.editProtein').value) || 0;
-    const newCarbs   = parseFloat(editor.querySelector('.editCarbs').value)   || 0;
-    const newFat     = parseFloat(editor.querySelector('.editFat').value)     || 0;
-    const newVeg     = parseFloat(editor.querySelector('.editVeggies').value) || 0;
+    const newCarbs = parseFloat(editor.querySelector('.editCarbs').value) || 0;
+    const newFat = parseFloat(editor.querySelector('.editFat').value) || 0;
+    const newSugar = parseFloat(editor.querySelector('.editSugar').value) || 0;
+    const newVeg = parseFloat(editor.querySelector('.editVeggies').value) || 0;
 
     if (!newName || isNaN(newCals)) {
       alert('Please enter a valid name and calories.');
@@ -862,6 +881,7 @@ function showMealEditor(row, meal, index) {
     user.meals[index].protein = newProtein;
     user.meals[index].carbs = newCarbs;
     user.meals[index].fat = newFat;
+    user.meals[index].sugar = newSugar;
     user.meals[index].veggies = newVeg;
 
     localStorage.setItem('profiles', JSON.stringify(profiles));
@@ -876,6 +896,7 @@ function showMealEditor(row, meal, index) {
 }
 
 function deleteMeal(index) {
+  if (!confirm('Delete this meal?')) return;
   const user = profiles[currentUser];
   user.meals.splice(index, 1);
   localStorage.setItem('profiles', JSON.stringify(profiles));
@@ -889,37 +910,48 @@ function renderMeals() {
   const user = profiles[currentUser];
   if (!user) return;
 
-  mealList.innerHTML = '';
+  if (mealList) {
+    mealList.innerHTML = '';
 
-  let total = 0;
-  user.meals.forEach((meal, index) => {
-    total += meal.calories;
-    const row = buildMealRow(meal, index);
-    mealList.appendChild(row);
-  });
+    const today = todayStr();
+    let total = 0;
+    
+    // Only count TODAY's meals for the summary
+    user.meals.forEach((meal, index) => {
+      if (meal.date === today) {
+        total += meal.calories;
+      }
+      const row = buildMealRow(meal, index);
+      mealList.appendChild(row);
+    });
 
-  const dailyTarget = (user.goal && user.goal.target) ? user.goal.target : 2000;
-  const remaining = dailyTarget - total;
+    if (totalCalories) totalCalories.textContent = `Total Calories: ${total}`;
 
-  totalCalories.textContent = `Total Calories: ${total}`;
-  remainingCalories.textContent = `Remaining Calories: ${remaining}`;
-  goalDisplay.textContent =
-    `Goal: ${(user.goal && user.goal.type) ? user.goal.type : 'maintain'} (${dailyTarget} cal)`;
+    const dailyTarget = (user.goal && user.goal.target) ? user.goal.target : 2000;
+    const remaining = dailyTarget - total;
+
+    if (remainingCalories) remainingCalories.textContent = `Remaining Calories: ${remaining}`;
+    if (goalDisplay) {
+      goalDisplay.textContent = `Goal: ${(user.goal && user.goal.type) ? user.goal.type : 'maintain'} (${dailyTarget} cal)`;
+    }
+  }
 
   const nameToShow = user.displayName || user.username || currentUser || 'User';
   if (welcomeMsg) {
     welcomeMsg.textContent = `Hello ${nameToShow}!`;
   }
-  userDisplay.textContent = `Logged in as: ${nameToShow}`;
+  if (userDisplay) {
+    userDisplay.textContent = `Logged in as: ${nameToShow}`;
+  }
 
   const heightStr = user.height ? formatHeightDisplay(user.height) : 'N/A';
   const weightStr = (user.weightLbs !== undefined && user.weightLbs !== null)
     ? `${user.weightLbs} lbs`
     : 'N/A';
 
-  // We removed "Age" here because birthdate -> age calc is not wired yet
-  profileDisplay.textContent =
-    `Height: ${heightStr} | Weight: ${weightStr}`;
+  if (profileDisplay) {
+    profileDisplay.textContent = `Height: ${heightStr} | Weight: ${weightStr}`;
+  }
 }
 
 /********************************
@@ -932,8 +964,9 @@ function getDailyTargets(user) {
   return {
     calories: baseCalories,
     protein: mg.proteinTarget || 150,
-    carbs:   mg.carbsTarget   || 200,
-    fat:     mg.fatTarget     || 70,
+    carbs: mg.carbsTarget || 200,
+    fat: mg.fatTarget || 70,
+    sugar: mg.sugarTarget || 50,
     veggies: mg.veggiesTarget || 5
   };
 }
@@ -945,6 +978,7 @@ function getTodayTotals(user) {
     protein: 0,
     carbs: 0,
     fat: 0,
+    sugar: 0,
     veggies: 0
   };
 
@@ -952,8 +986,9 @@ function getTodayTotals(user) {
     if (m.date === today) {
       totals.calories += m.calories || 0;
       totals.protein += m.protein || 0;
-      totals.carbs   += m.carbs   || 0;
-      totals.fat     += m.fat     || 0;
+      totals.carbs += m.carbs || 0;
+      totals.fat += m.fat || 0;
+      totals.sugar += m.sugar || 0;
       totals.veggies += m.veggies || 0;
     }
   });
@@ -971,7 +1006,6 @@ function drawRing(canvas, value, goal, unitLabel, labelEl) {
 
   ctx.clearRect(0, 0, size, size);
 
-  // gray background ring
   ctx.beginPath();
   ctx.arc(center, center, baseRadius, 0, 2 * Math.PI);
   ctx.strokeStyle = '#444';
@@ -987,7 +1021,6 @@ function drawRing(canvas, value, goal, unitLabel, labelEl) {
   const startAngle = -Math.PI / 2;
   const blueEndAngle = startAngle + pctBase * 2 * Math.PI;
 
-  // base blue progress
   ctx.beginPath();
   ctx.arc(center, center, baseRadius, startAngle, blueEndAngle);
   ctx.lineWidth = baseWidth;
@@ -995,7 +1028,6 @@ function drawRing(canvas, value, goal, unitLabel, labelEl) {
   ctx.strokeStyle = '#1f6feb';
   ctx.stroke();
 
-  // green halo if exceeded goal
   if (pctOver > 0) {
     const greenEndAngle = startAngle + pctOver * 2 * Math.PI;
     ctx.beginPath();
@@ -1006,7 +1038,6 @@ function drawRing(canvas, value, goal, unitLabel, labelEl) {
     ctx.stroke();
   }
 
-  // text inside ring
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 14px Arial';
   ctx.textAlign = 'center';
@@ -1025,41 +1056,12 @@ function renderDashboardRings() {
   const targets = getDailyTargets(user);
   const totals = getTodayTotals(user);
 
-  drawRing(
-    ringCaloriesCanvas,
-    totals.calories,
-    targets.calories,
-    `${totals.calories}`,
-    ringCaloriesText
-  );
-  drawRing(
-    ringProteinCanvas,
-    totals.protein,
-    targets.protein,
-    `${totals.protein}g`,
-    ringProteinText
-  );
-  drawRing(
-    ringCarbsCanvas,
-    totals.carbs,
-    targets.carbs,
-    `${totals.carbs}g`,
-    ringCarbsText
-  );
-  drawRing(
-    ringFatCanvas,
-    totals.fat,
-    targets.fat,
-    `${totals.fat}g`,
-    ringFatText
-  );
-  drawRing(
-    ringVeggiesCanvas,
-    totals.veggies,
-    targets.veggies,
-    `${totals.veggies}`,
-    ringVeggiesText
-  );
+  drawRing(ringCaloriesCanvas, totals.calories, targets.calories, `${totals.calories}`, ringCaloriesText);
+  drawRing(ringProteinCanvas, totals.protein, targets.protein, `${totals.protein}g`, ringProteinText);
+  drawRing(ringCarbsCanvas, totals.carbs, targets.carbs, `${totals.carbs}g`, ringCarbsText);
+  drawRing(ringFatCanvas, totals.fat, targets.fat, `${totals.fat}g`, ringFatText);
+  drawRing(ringSugarCanvas, totals.sugar, targets.sugar, `${totals.sugar}g`, ringSugarText);
+  drawRing(ringVeggiesCanvas, totals.veggies, targets.veggies, `${totals.veggies}`, ringVeggiesText);
 }
 
 /********************************
@@ -1069,7 +1071,6 @@ function renderCharts() {
   const user = profiles[currentUser];
   if (!user) return;
 
-  // calories per day bar
   const dailyTotals = {};
   (user.meals || []).forEach(meal => {
     dailyTotals[meal.date] = (dailyTotals[meal.date] || 0) + meal.calories;
@@ -1077,23 +1078,25 @@ function renderCharts() {
   const labels = Object.keys(dailyTotals);
   const caloriesData = Object.values(dailyTotals);
 
-  const calCtx = document.getElementById('calorieChart').getContext('2d');
-  new Chart(calCtx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Calories Per Day',
-        data: caloriesData,
-        backgroundColor: '#1f6feb'
-      }]
-    },
-    options: {
-      scales: { y: { beginAtZero: true } }
-    }
-  });
+  const calChartEl = document.getElementById('calorieChart');
+  if (calChartEl) {
+    const calCtx = calChartEl.getContext('2d');
+    new Chart(calCtx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Calories Per Day',
+          data: caloriesData,
+          backgroundColor: '#1f6feb'
+        }]
+      },
+      options: {
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
 
-  // weight line chart
   const weightDates = [];
   const weightVals = [];
   if (user.weighIns && user.weighIns.length > 0) {
@@ -1106,22 +1109,25 @@ function renderCharts() {
     weightVals.push(user.weightLbs || 0);
   }
 
-  const wtCtx = document.getElementById('weightChart').getContext('2d');
-  new Chart(wtCtx, {
-    type: 'line',
-    data: {
-      labels: weightDates,
-      datasets: [{
-        label: 'Weight (lbs)',
-        data: weightVals,
-        borderColor: '#8ecae6',
-        fill: false
-      }]
-    },
-    options: {
-      scales: { y: { beginAtZero: false } }
-    }
-  });
+  const wtChartEl = document.getElementById('weightChart');
+  if (wtChartEl) {
+    const wtCtx = wtChartEl.getContext('2d');
+    new Chart(wtCtx, {
+      type: 'line',
+      data: {
+        labels: weightDates,
+        datasets: [{
+          label: 'Weight (lbs)',
+          data: weightVals,
+          borderColor: '#8ecae6',
+          fill: false
+        }]
+      },
+      options: {
+        scales: { y: { beginAtZero: false } }
+      }
+    });
+  }
 }
 
 /********************************
@@ -1130,9 +1136,12 @@ function renderCharts() {
 if (sendMessageBtn) {
   sendMessageBtn.addEventListener('click', () => {
     alert('Your message has been sent. Thank you!');
-    document.getElementById('contactName').value = '';
-    document.getElementById('contactEmail').value = '';
-    document.getElementById('contactMessage').value = '';
+    const nameEl = document.getElementById('contactName');
+    const emailEl = document.getElementById('contactEmail');
+    const msgEl = document.getElementById('contactMessage');
+    if (nameEl) nameEl.value = '';
+    if (emailEl) emailEl.value = '';
+    if (msgEl) msgEl.value = '';
   });
 }
 
@@ -1140,13 +1149,25 @@ if (sendMessageBtn) {
  * INIT / STARTUP
  ********************************/
 function showApp() {
+  // Force header visibility FIRST
+  const menuIconEl = document.getElementById('menuIcon');
+  const headerLinksRow = document.querySelector('.header-links-row');
+  if (menuIconEl) {
+    menuIconEl.style.display = "block";
+    menuIconEl.style.visibility = "visible";
+  }
+  if (headerLinksRow) {
+    headerLinksRow.style.display = "flex";
+    headerLinksRow.style.visibility = "visible";
+  }
+  
   // Dashboard is now the main / home view
   showSection(sections.dashboard);
 
   // load dashboard content
-  renderMeals();          // summary on dashboard
-  renderDashboardRings(); // rings
-  renderCharts();         // charts
+  renderMeals();
+  renderDashboardRings();
+  renderCharts();
 
   // ensure header reflects logged-in state
   updateMenuVisibility();
@@ -1155,9 +1176,31 @@ function showApp() {
   loadTargetsUI();
 }
 
-// Force start on login screen every time the page loads
-currentUser = null;
-localStorage.removeItem('currentUser');
+document.addEventListener('DOMContentLoaded', () => {
+  if (!currentUser) currentUser = localStorage.getItem('currentUser') || null;
+  updateMenuVisibility();
 
-showSection(sections.login);
-updateMenuVisibility();
+  if (sections && sections.dashboard && typeof showSection === 'function') {
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = urlParams.get('page');
+    const go = urlParams.get('go');
+
+    if (currentUser) {
+      if (page === 'account') {
+        showSection(sections.account);
+        loadAccountForm();
+      } else if (page === 'help') {
+        showSection(sections.help);
+      } else if (page === 'contact') {
+        showSection(sections.contact);
+      } else if (go === 'dashboard' || page === 'dashboard') {
+        showApp();
+      } else {
+        showApp();
+      }
+    } else {
+      showSection(sections.login);
+      updateMenuVisibility();
+    }
+  }
+});

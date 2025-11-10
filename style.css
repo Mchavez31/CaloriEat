@@ -21,16 +21,6 @@ header {
   position: relative;
 }
 
-/* existing header can stay the same except we're going to support a 2-row layout now */
-header {
-  background: #1f6feb;
-  color: white;
-  text-align: center;
-  padding: 1rem;
-  position: relative;
-  /* you likely already have something like this */
-}
-
 /* make sure header top row items (title + menu icon) sit next to each other nicely */
 .header-top-row {
   display: flex;
@@ -46,16 +36,11 @@ header {
   font-weight: bold;
 }
 
-.header-links-row,
-#menuIcon {
-  display: none;
-}
-
 /* the 3-link row */
 .header-links-row {
   margin-top: 0.75rem;
   display: flex;
-  justify-content: space-around; /* <-- even spacing */
+  justify-content: space-around;
   gap: 1rem;
   font-size: 0.9rem;
   font-weight: 500;
@@ -66,6 +51,7 @@ header {
 .header-link {
   cursor: pointer;
   color: #cfe8ff;
+  text-decoration: none;
 }
 
 .header-link:hover {
@@ -74,12 +60,13 @@ header {
 }
 
 .menu-icon {
+  display: block;
   position: absolute;
-  left: 1rem;
-  top: 1rem;
-  font-size: 1.5rem;
+  left: 20px;
+  top: 18px;
+  font-size: 28px;
   cursor: pointer;
-  user-select: none;
+  color: white;
 }
 
 /* Dropdown menu */
@@ -234,6 +221,12 @@ button:hover {
   gap: 0.5rem;
 }
 
+.inline-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
 .row-inline-2col {
   display: flex;
   gap: 1rem;
@@ -252,7 +245,18 @@ button:hover {
   border-radius: 8px;
 }
 
+.summary h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  font-size: 1rem;
+}
+
 /* Meal list styles */
+.meal-list {
+  margin-top: 1rem;
+}
+
 .meal-row {
   background: #2a2a2a;
   border-radius: 6px;
@@ -288,6 +292,7 @@ button:hover {
   cursor: pointer;
   width: auto;
   display: inline-block;
+  margin-top: 0;
 }
 .small-btn.edit { background: #265dbf; }
 .small-btn.delete { background: #8b0000; }
@@ -305,11 +310,7 @@ button:hover {
 .meal-edit-block label {
   font-size: 0.8rem;
 }
-.inline-grid-2col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-}
+
 .inline-flex-end {
   display: flex;
   justify-content: flex-end;
@@ -348,22 +349,44 @@ button:hover {
 
 /* Dashboard rings */
 .rings-wrapper {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1rem;
   margin-bottom: 2rem;
+  margin-top: 1.5rem;
 }
+
+.ring-card {
+  flex: 0 0 calc(25% - 1rem);
+  min-width: 110px;
+  max-width: 150px;
+}
+
+/* Make last row (sugar & veggies) centered */
+.rings-wrapper .ring-card:nth-child(5),
+.rings-wrapper .ring-card:nth-child(6) {
+  flex: 0 0 calc(25% - 1rem);
+}
+
+@media (max-width: 768px) {
+  .ring-card {
+    flex: 0 0 calc(50% - 1rem);
+  }
+}
+
 .ring-card {
   background: #1e1e1e;
   border-radius: 10px;
   padding: 1rem;
   text-align: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  border: 1px solid #333;
 }
 .ring-label {
   font-size: 0.9rem;
   margin-top: 0.5rem;
-  color: #f0f0f0;
+  color: #8ecae6;
 }
 .ring-desc {
   font-size: 0.7rem;
@@ -389,47 +412,35 @@ button:hover {
   margin-top: 1rem;
 }
 
+/* Food search results */
+#foodResults {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+  background: #2a2a2a;
+  border-radius: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #3a3a3a;
+  display: none; /* Hidden by default */
+  position: relative;
+  z-index: 100;
+}
+
+#foodResults li {
+  padding: 0.75rem;
+  border-bottom: 1px solid #3a3a3a;
+  transition: background 0.2s ease;
+}
+
+#foodResults li:last-child {
+  border-bottom: none;
+}
+
+#foodResults li:hover {
+  background: #3a3a3a;
+  cursor: pointer;
+}
+
 /* Utility */
 .hidden { display: none; }
-
-
-.summary {
-  margin-top: 1rem;
-  background: #242424;
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid #333;
-  color: #f0f0f0;
-  font-size: 0.9rem;
-}
-
-.summary h3 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-  color: #fff;
-  font-size: 1rem;
-}
-
-.rings-wrapper {
-  margin-top: 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  gap: 1rem;
-  text-align: center;
-}
-
-.ring-block {
-  background: #1e1e1e;
-  border: 1px solid #333;
-  border-radius: 10px;
-  padding: 0.75rem;
-  width: 120px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.6);
-}
-
-.ring-label {
-  color: #8ecae6;
-  font-size: 0.8rem;
-  margin-top: 0.5rem;
-}

@@ -17,20 +17,19 @@
 
     <div class="menu-icon" id="menuIcon">☰</div>
     <div class="dropdown" id="menuDropdown">
-      <a href="#" id="menuHome">Home</a>
-      <a href="#" id="menuDashboard">Dashboard</a>
-      <a href="#" id="menuAccount">Account</a>
-      <a href="#" id="menuHelp">Help</a>
-      <a href="#" id="menuContact">Contact</a>
+      <a href="Index_Modular.html?page=dashboard" id="menuDashboard">Dashboard</a>
+      <a href="Index_Modular.html?page=account" id="menuAccount">Account</a>
+      <a href="Index_Modular.html?page=help" id="menuHelp">Help</a>
+      <a href="Index_Modular.html?page=contact" id="menuContact">Contact</a>
       <a href="#" id="menuLogout">Logout</a>
     </div>
   </div>
 
   <!-- NEW clickable links row INSIDE the blue header -->
   <div class="header-links-row">
-    <span class="header-link" id="linkGoals">Set Goals</span>
-    <span class="header-link" id="linkMeals">Add Meals</span>
-    <span class="header-link" id="linkWeighIn">Weigh In</span>
+    <a class="header-link" href="set-goals.html">Set Goals</a>
+    <a class="header-link" href="add-meal.html">Add Meals</a>
+    <a class="header-link" href="weigh-in.html">Weigh In</a>
   </div>
 </header>
 
@@ -93,14 +92,14 @@
     <label for="birthdateSignup">Birthdate:</label>
     <input type="date" id="birthdateSignup">
 
-    <label for="heightFtIn">Height (ft/in, e.g. 6'1&quot; or 5 11 or 62 for 6'2&quot;):</label>
-    <input type="text" id="heightFtIn" placeholder="6'1&quot; or 5 11 or 62">
+    <label for="heightFtIn">Height (ft/in, e.g. 6'1" or 5 11 or 62 for 6'2"):</label>
+    <input type="text" id="heightFtIn" placeholder="6'1" or 5 11 or 62">
 
     <label for="weightLbs">Weight (lbs):</label>
     <input type="number" id="weightLbs" placeholder="e.g., 185" step="0.1">
 
-    <label for="Gender">Gender:</label>
-    <select id="Gender">
+    <label for="gender">Gender:</label>
+    <select id="gender">
       <option value="male">Male</option>
       <option value="female">Female</option>
     </select>
@@ -108,12 +107,11 @@
     <button id="saveProfileBtn">Save Profile</button>
 
     <div class="forgot-link">
-  <a href="#" id="backToLoginLink">Back to Login</a>
-</div>
-
+      <a href="#" id="backToLoginLink">Back to Login</a>
+    </div>
   </div>
 
-  <!-- HOME / APP SECTION -->
+  <!-- HOME / APP SECTION (Goals Setting) -->
   <div class="container hidden" id="appSection">
     <h2 id="welcomeMsg"></h2>
 
@@ -145,6 +143,10 @@
         <div>
           <label for="fatTarget">Fat Target (g):</label>
           <input type="number" id="fatTarget" placeholder="70">
+        </div>
+        <div>
+          <label for="sugarTarget">Sugar Target (g):</label>
+          <input type="number" id="sugarTarget" placeholder="50">
         </div>
         <div>
           <label for="veggiesTarget">Veggies Target (servings):</label>
@@ -182,9 +184,15 @@
       </div>
     </div>
 
-    <div>
-      <label for="veggies">Veggie Servings:</label>
-      <input type="number" id="veggies" placeholder="e.g., 1">
+    <div class="inline-grid-2col">
+      <div>
+        <label for="sugar">Sugar (g):</label>
+        <input type="number" id="sugar" placeholder="e.g., 5">
+      </div>
+      <div>
+        <label for="veggies">Veggie Servings:</label>
+        <input type="number" id="veggies" placeholder="e.g., 1">
+      </div>
     </div>
 
     <button id="addMealBtn">Add Meal</button>
@@ -200,8 +208,7 @@
     </div>
 
     <h4>Meals</h4>
-      <div id="mealList"></div>
-
+    <div id="mealList"></div>
   </div>
 
   <!-- DASHBOARD SECTION -->
@@ -245,6 +252,12 @@
       </div>
 
       <div class="ring-card">
+        <canvas id="ringSugar" class="ringCanvas" width="100" height="100"></canvas>
+        <div class="ring-label">Sugar</div>
+        <div class="ring-desc" id="ringSugarText"></div>
+      </div>
+
+      <div class="ring-card">
         <canvas id="ringVeggies" class="ringCanvas" width="100" height="100"></canvas>
         <div class="ring-label">Veggies</div>
         <div class="ring-desc" id="ringVeggiesText"></div>
@@ -269,7 +282,7 @@
     <input type="date" id="acctBirthdate">
 
     <label for="acctHeightFtIn">Height (ft/in):</label>
-    <input type="text" id="acctHeightFtIn" placeholder="6'1&quot; or 5 11 or 62">
+    <input type="text" id="acctHeightFtIn" placeholder="6'1" or 5 11 or 62">
 
     <label for="acctWeightLbs">Weight (lbs):</label>
     <input type="number" id="acctWeightLbs" step="0.1" placeholder="e.g., 184.5">
@@ -293,27 +306,42 @@
   <div class="container hidden" id="helpSection">
     <h2>Help Page</h2>
     <ul>
-      <li>Set calorie & macro goals.</li>
-      <li>Log meals with calories, protein, carbs, fat, and veggie servings.</li>
-      <li>Log weight in lbs.</li>
-      <li>See daily progress rings + charts on Dashboard.</li>
-      <li>Update your profile any time under Account.</li>
+      <li><strong>Dashboard:</strong> View your daily progress with rings showing calories, protein, carbs, fat, sugar, and veggie servings. See charts tracking your calorie intake and weight over time.</li>
+      <li><strong>Set Goals:</strong> Define your daily calorie target (maintain, lose, or gain weight) and set macro goals for protein, carbs, fat, sugar, and vegetable servings.</li>
+      <li><strong>Add Meals:</strong> Log meals with calories and macros (including sugar). Use the food search to quickly find common foods. Edit or delete meals as needed.</li>
+      <li><strong>Weigh In:</strong> Track your weight over time. Add new weigh-ins and view your weight history.</li>
+      <li><strong>Account:</strong> Update your profile information including display name, email, birthdate, height, weight, and gender.</li>
+      <li><strong>Navigation:</strong> Use the hamburger menu (☰) in the top-left to access all sections, or use the quick links in the blue header.</li>
+    </ul>
+    
+    <h3>Tips</h3>
+    <ul>
+      <li>Set realistic goals based on your activity level and weight goals</li>
+      <li>Log meals consistently for accurate tracking</li>
+      <li>Weigh yourself at the same time each day for consistency</li>
+      <li>The dashboard rings turn green when you exceed your targets</li>
+      <li>Use the food search to quickly add common foods</li>
+      <li>Monitor your sugar intake to maintain healthy eating habits</li>
     </ul>
   </div>
 
   <!-- CONTACT SECTION -->
   <div class="container hidden" id="contactSection">
     <h2>Contact Us</h2>
+    <p>Have questions, feedback, or need support? Send us a message!</p>
+    
     <label for="contactName">Name:</label>
-    <input type="text" id="contactName">
+    <input type="text" id="contactName" placeholder="Your name">
 
     <label for="contactEmail">Email:</label>
-    <input type="email" id="contactEmail">
+    <input type="email" id="contactEmail" placeholder="your.email@example.com">
 
     <label for="contactMessage">Message:</label>
-    <textarea id="contactMessage" rows="4"></textarea>
+    <textarea id="contactMessage" rows="5" placeholder="Tell us what's on your mind..."></textarea>
 
     <button id="sendMessageBtn">Send Message</button>
+    
+    <p class="note">Note: This is a demo app. Messages are not actually sent.</p>
   </div>
 
   <script src="app.js"></script>
