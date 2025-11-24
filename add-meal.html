@@ -36,6 +36,14 @@
     <label for="meal">Meal Name:</label>
     <input type="text" id="meal" placeholder="e.g., Chicken Salad">
 
+    <label>Meal Type:</label>
+    <div class="inline-grid-2col" style="margin-bottom: 1rem;">
+      <button type="button" class="meal-type-btn" data-type="breakfast">🌅 Breakfast</button>
+      <button type="button" class="meal-type-btn" data-type="lunch">☀️ Lunch</button>
+      <button type="button" class="meal-type-btn" data-type="dinner">🌙 Dinner</button>
+      <button type="button" class="meal-type-btn" data-type="snack">🍿 Snack</button>
+    </div>
+
     <label for="foodSearch">Search Food:</label>
     <input type="text" id="foodSearch" placeholder="e.g., Apple, Rice, Burger">
     <ul id="foodResults"></ul>
@@ -64,14 +72,20 @@
         <input type="number" id="sugar" placeholder="5">
       </div>
       <div>
-        <label for="veggies">Veggie Servings:</label>
-        <input type="number" id="veggies" placeholder="1">
+        <label for="veggies">Veggies (cups):</label>
+        <input type="number" id="veggies" placeholder="1" step="0.1">
+        <span id="veggiesGrams" style="font-size: 0.8rem; color: #8ecae6; margin-top: 0.25rem; display: block;">≈ 0g</span>
       </div>
     </div>
 
     <button id="addMealBtn">Add Meal</button>
 
-    <h3>Today's Meals</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem;">
+      <h3 id="mealListTitle">Today's Meals</h3>
+      <button id="toggleHistoryBtn" class="small-btn" style="background: #1f6feb; margin-top: 0;">
+        📅 View All History
+      </button>
+    </div>
     <div id="mealList" class="meal-list"></div>
   </main>
 

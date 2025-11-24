@@ -211,62 +211,297 @@
     <div id="mealList"></div>
   </div>
 
-  <!-- DASHBOARD SECTION -->
-  <div class="container hidden" id="dashboardSection">
-    <h2>Dashboard</h2>
+<!-- DASHBOARD SECTION -->
+<div class="container hidden" id="dashboardSection">
+  <h2>Dashboard</h2>
 
-    <!-- SUMMARY -->
-    <div class="summary">
-      <h3>Today's Summary</h3>
-      <p id="userDisplay"></p>
-      <p id="profileDisplay"></p>
+  <!-- SUMMARY -->
+  <div class="summary">
+    <h3>Today's Summary</h3>
+    <p id="userDisplay"></p>
+    <p id="profileDisplay"></p>
 
-      <p id="goalDisplay">Goal: Not Set</p>
-      <p id="totalCalories">Total Calories: 0</p>
-      <p id="remainingCalories">Remaining Calories: -</p>
+    <p id="goalDisplay">Goal: Not Set</p>
+    <p id="totalCalories">Total Calories: 0</p>
+    <p id="remainingCalories">Remaining Calories: -</p>
+    
+    <!-- Average Calories Per Time Period -->
+    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #3a3a3a;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <span><strong>Average Calories:</strong></span>
+        <select id="avgCaloriesPeriod" style="width: auto; margin: 0; padding: 0.4rem 0.6rem; font-size: 0.85rem;">
+          <option value="day">Per Day</option>
+          <option value="week">Per Week</option>
+          <option value="month">Per Month</option>
+          <option value="year">Per Year</option>
+        </select>
+      </div>
+      <p id="avgCaloriesDisplay" style="margin-top: 0.5rem; font-size: 1.1rem; color: #8ecae6;">
+        <strong>0 cal/day</strong>
+      </p>
     </div>
-
-    <div class="rings-wrapper">
-      <div class="ring-card">
-        <canvas id="ringCalories" class="ringCanvas" width="100" height="100"></canvas>
-        <div class="ring-label">Calories</div>
-        <div class="ring-desc" id="ringCaloriesText"></div>
-      </div>
-
-      <div class="ring-card">
-        <canvas id="ringProtein" class="ringCanvas" width="100" height="100"></canvas>
-        <div class="ring-label">Protein</div>
-        <div class="ring-desc" id="ringProteinText"></div>
-      </div>
-
-      <div class="ring-card">
-        <canvas id="ringCarbs" class="ringCanvas" width="100" height="100"></canvas>
-        <div class="ring-label">Carbs</div>
-        <div class="ring-desc" id="ringCarbsText"></div>
-      </div>
-
-      <div class="ring-card">
-        <canvas id="ringFat" class="ringCanvas" width="100" height="100"></canvas>
-        <div class="ring-label">Fat</div>
-        <div class="ring-desc" id="ringFatText"></div>
-      </div>
-
-      <div class="ring-card">
-        <canvas id="ringSugar" class="ringCanvas" width="100" height="100"></canvas>
-        <div class="ring-label">Sugar</div>
-        <div class="ring-desc" id="ringSugarText"></div>
-      </div>
-
-      <div class="ring-card">
-        <canvas id="ringVeggies" class="ringCanvas" width="100" height="100"></canvas>
-        <div class="ring-label">Veggies</div>
-        <div class="ring-desc" id="ringVeggiesText"></div>
-      </div>
-    </div>
-
-    <canvas id="calorieChart" class="chartCanvas" width="400" height="200"></canvas>
-    <canvas id="weightChart" class="chartCanvas" width="400" height="200"></canvas>
   </div>
+
+  <div class="rings-wrapper">
+    <div class="ring-card">
+      <canvas id="ringCalories" class="ringCanvas" width="100" height="100"></canvas>
+      <div class="ring-label">Calories</div>
+      <div class="ring-desc" id="ringCaloriesText"></div>
+    </div>
+
+    <div class="ring-card">
+      <canvas id="ringProtein" class="ringCanvas" width="100" height="100"></canvas>
+      <div class="ring-label">Protein</div>
+      <div class="ring-desc" id="ringProteinText"></div>
+    </div>
+
+    <div class="ring-card">
+      <canvas id="ringCarbs" class="ringCanvas" width="100" height="100"></canvas>
+      <div class="ring-label">Carbs</div>
+      <div class="ring-desc" id="ringCarbsText"></div>
+    </div>
+
+    <div class="ring-card">
+      <canvas id="ringFat" class="ringCanvas" width="100" height="100"></canvas>
+      <div class="ring-label">Fat</div>
+      <div class="ring-desc" id="ringFatText"></div>
+    </div>
+
+    <div class="ring-card">
+      <canvas id="ringSugar" class="ringCanvas" width="100" height="100"></canvas>
+      <div class="ring-label">Sugar</div>
+      <div class="ring-desc" id="ringSugarText"></div>
+    </div>
+
+    <div class="ring-card">
+      <canvas id="ringVeggies" class="ringCanvas" width="100" height="100"></canvas>
+      <div class="ring-label">Veggies</div>
+      <div class="ring-desc" id="ringVeggiesText"></div>
+    </div>
+  </div>
+
+  <!-- PROGRESS ANALYSIS SECTION -->
+  <div class="progress-analysis-section">
+    <h3>Progress Analysis</h3>
+    
+    <!-- Pie Chart 1: Macros Distribution -->
+    <div class="pie-chart-container">
+      <div class="pie-chart-header">
+        <h4>Average Macros Distribution</h4>
+        <div class="time-period-selector">
+          <label>Period:</label>
+          <select id="macrosPiePeriod" class="period-select">
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+          </select>
+        </div>
+      </div>
+      <canvas id="macrosPieChart" class="pieCanvas"></canvas>
+    </div>
+    
+    <!-- Pie Chart 2: Food Categories Distribution -->
+    <div class="pie-chart-container">
+      <div class="pie-chart-header">
+        <h4>Average Food Categories Distribution</h4>
+        <div class="time-period-selector">
+          <label>Period:</label>
+          <select id="categoriesPiePeriod" class="period-select">
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+          </select>
+        </div>
+      </div>
+      <canvas id="categoriesPieChart" class="pieCanvas"></canvas>
+    </div>
+    
+    <!-- Pie Chart 3: Meal Type Calories Distribution -->
+    <div class="pie-chart-container">
+      <div class="pie-chart-header">
+        <h4>Average Calories by Meal Type</h4>
+        <div class="time-period-selector">
+          <label>Period:</label>
+          <select id="mealTypePiePeriod" class="period-select">
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+          </select>
+        </div>
+      </div>
+      <canvas id="mealTypePieChart" class="pieCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- NEW: INTERACTIVE CHARTS SECTION -->
+  <div class="charts-section">
+    <h3>Progress Over Time</h3>
+    
+<!-- 1) Calorie Intake Chart -->
+    <div class="chart-container" data-chart="calorie">
+      <h4>Calories Per Day</h4>
+      <span class="chart-hint">💡 Click on bars for details</span>
+      <button class="expand-btn" title="Expand to fullscreen">⛶</button>
+      <canvas id="calorieChart" class="chartCanvas"></canvas>
+    </div>
+
+    <!-- 2) Macros & Sugar Chart -->
+    <div class="chart-container" data-chart="macros">
+      <div class="chart-header">
+        <h4>Macros & Sugar (grams)</h4>
+        <div class="chart-controls">
+          <button class="toggle-btn active" data-metric="protein" style="background: #1f6feb;">
+            💪 Protein
+          </button>
+          <button class="toggle-btn active" data-metric="carbs" style="background: #8ecae6;">
+            🍞 Carbs
+          </button>
+          <button class="toggle-btn active" data-metric="fat" style="background: #ffb703;">
+            🥑 Fat
+          </button>
+          <button class="toggle-btn active" data-metric="sugar" style="background: #fb5607;">
+            🍬 Sugar
+          </button>
+        </div>
+      </div>
+      
+      <!-- Time Period Selector -->
+      <div class="time-period-selector">
+        <label for="macrosPeriod">Time Period:</label>
+        <select id="macrosPeriod" class="period-select">
+          <option value="overall">Overall</option>
+          <option value="yearly">Yearly</option>
+          <option value="monthly">Monthly</option>
+          <option value="weekly">Weekly</option>
+        </select>
+        <button id="macrosCalendarBtn" class="calendar-btn hidden">📅 Select Date</button>
+        <input type="date" id="macrosDatePicker" class="date-picker hidden">
+      </div>
+      
+      <span class="chart-hint">💡 Click on lines for details</span>
+      <button class="expand-btn" title="Expand to fullscreen">⛶</button>
+      <canvas id="macrosChart" class="interactiveChart"></canvas>
+      
+      <!-- Legend -->
+      <div id="macrosLegend" class="chart-legend"></div>
+    </div>
+
+    <!-- 3) Meal Type Breakdown Chart -->
+    <div class="chart-container" data-chart="mealType">
+      <div class="chart-header">
+        <h4>Meal Type Breakdown Over Time</h4>
+        <div class="chart-controls">
+          <button class="toggle-btn active" data-metric="breakfast" style="background: #ff9800;">
+            🌅 Breakfast
+          </button>
+          <button class="toggle-btn active" data-metric="lunch" style="background: #ffc107;">
+            ☀️ Lunch
+          </button>
+          <button class="toggle-btn active" data-metric="dinner" style="background: #2196f3;">
+            🌙 Dinner
+          </button>
+          <button class="toggle-btn active" data-metric="snack" style="background: #9c27b0;">
+            🍿 Snack
+          </button>
+        </div>
+      </div>
+      
+      <!-- Metric Selector -->
+      <div class="time-period-selector">
+        <label for="mealTypeMetric">Show:</label>
+        <select id="mealTypeMetric" class="period-select">
+          <option value="calories">Calories (cal)</option>
+          <option value="protein">Protein (g)</option>
+          <option value="carbs">Carbs (g)</option>
+          <option value="fat">Fat (g)</option>
+          <option value="sugar">Sugar (g)</option>
+          <option value="veggies">Veggies (cal)</option>
+          <option value="fruits">Fruits (cal)</option>
+          <option value="grains">Grains (cal)</option>
+          <option value="processedFoods">Processed Foods (cal)</option>
+        </select>
+      </div>
+
+      <!-- Time Period Selector -->
+      <div class="time-period-selector">
+        <label for="mealTypePeriod">Time Period:</label>
+        <select id="mealTypePeriod" class="period-select">
+          <option value="overall">Overall</option>
+          <option value="yearly">Yearly</option>
+          <option value="monthly">Monthly</option>
+          <option value="weekly">Weekly</option>
+        </select>
+        <button id="mealTypeCalendarBtn" class="calendar-btn hidden">📅 Select Date</button>
+        <input type="date" id="mealTypeDatePicker" class="date-picker hidden">
+      </div>
+      
+      <span class="chart-hint">💡 Click on lines for details</span>
+      <button class="expand-btn" title="Expand to fullscreen">⛶</button>
+      <canvas id="mealTypeChart" class="interactiveChart"></canvas>
+      
+      <!-- Legend -->
+      <div id="mealTypeLegend" class="chart-legend"></div>
+    </div>
+
+     <!-- 4) Food Categories Chart -->
+    <div class="chart-container" data-chart="categories">
+      <div class="chart-header">
+        <h4>Food Categories (% of Diet)</h4>
+        <div class="chart-controls">
+          <button class="toggle-btn active" data-metric="fruits" style="background: #ff6b9d;">
+            🍎 Fruits
+          </button>
+          <button class="toggle-btn active" data-metric="veggies" style="background: #00c853;">
+            🥦 Veggies
+          </button>
+          <button class="toggle-btn active" data-metric="wholeGrains" style="background: #d4a574;">
+            🌾 Grains
+          </button>
+          <button class="toggle-btn active" data-metric="leanProteins" style="background: #1f6feb;">
+            🍗 Proteins
+          </button>
+          <button class="toggle-btn active" data-metric="processedFoods" style="background: #fb8500;">
+            🍔 Processed
+          </button>
+          <button class="toggle-btn active" data-metric="sugaryFoods" style="background: #dc2626;">
+            🍭 Sugary
+          </button>
+        </div>
+      </div>
+      
+      <!-- Time Period Selector -->
+      <div class="time-period-selector">
+        <label for="categoriesPeriod">Time Period:</label>
+        <select id="categoriesPeriod" class="period-select">
+          <option value="overall">Overall</option>
+          <option value="yearly">Yearly</option>
+          <option value="monthly">Monthly</option>
+          <option value="weekly">Weekly</option>
+        </select>
+        <button id="categoriesCalendarBtn" class="calendar-btn hidden">📅 Select Date</button>
+        <input type="date" id="categoriesDatePicker" class="date-picker hidden">
+      </div>
+      
+      <span class="chart-hint">💡 Click on lines for details</span>
+      <button class="expand-btn" title="Expand to fullscreen">⛶</button>
+      <canvas id="veggiesChart" class="interactiveChart"></canvas>
+      
+      <!-- Legend -->
+      <div id="categoriesLegend" class="chart-legend"></div>
+    </div>
+
+    <!-- 5) Weight Chart -->
+    <div class="chart-container" data-chart="weight">
+      <h4>Weight Over Time</h4>
+      <span class="chart-hint">💡 Click on lines for details</span>
+      <button class="expand-btn" title="Expand to fullscreen">⛶</button>
+      <canvas id="weightChart" class="chartCanvas"></canvas>
+    </div>
+  </div>
+</div>
 
   <!-- ACCOUNT SECTION -->
   <div class="container hidden" id="accountSection">

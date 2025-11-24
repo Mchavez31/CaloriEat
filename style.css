@@ -444,3 +444,462 @@ button:hover {
 
 /* Utility */
 .hidden { display: none; }
+
+/* Meal Type Buttons */
+.meal-type-btn {
+  background: #2a2a2a;
+  border: 2px solid #3a3a3a;
+  color: #f0f0f0;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin: 0;
+}
+
+.meal-type-btn:hover {
+  background: #3a3a3a;
+  border-color: #1f6feb;
+}
+
+.meal-type-btn.selected {
+  background: #1f6feb;
+  border-color: #1f6feb;
+  box-shadow: 0 0 10px rgba(31, 111, 235, 0.5);
+  font-weight: bold;
+}
+
+/* Interactive Charts Section */
+.charts-section {
+  margin-top: 2rem;
+}
+
+.charts-section h3 {
+  color: #fff;
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+}
+
+.chart-container {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chart-header h4 {
+  color: #fff;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.chart-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.toggle-btn {
+  padding: 0.5rem 0.75rem;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  width: auto;
+  margin-top: 0;
+}
+
+.toggle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.toggle-btn.active {
+  border-color: white;
+  opacity: 1;
+}
+
+.toggle-btn:not(.active) {
+  opacity: 0.4;
+  filter: grayscale(50%);
+}
+
+.interactiveChart {
+  width: 100% !important;
+  height: 300px !important;
+  max-height: 300px;
+}
+
+.chartCanvas {
+  width: 100% !important;
+  height: 250px !important;
+  max-height: 250px;
+}
+
+@media (max-width: 768px) {
+  .chart-controls {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .toggle-btn {
+    flex: 1;
+    min-width: 80px;
+  }
+}
+
+.chart-container {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.chart-hint {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 0.75rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* Chart tooltip popup */
+.chart-tooltip {
+  position: fixed;
+  background: #1e1e1e;
+  border: 2px solid #1f6feb;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+  z-index: 10000;
+  max-width: 300px;
+  min-width: 250px;
+  color: #f0f0f0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.chart-tooltip-header {
+  font-weight: bold;
+  color: #8ecae6;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  border-bottom: 1px solid #333;
+  padding-bottom: 0.5rem;
+}
+
+.chart-tooltip-total {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #fff;
+  margin: 0.5rem 0;
+}
+
+.chart-tooltip-breakdown {
+  margin-top: 0.75rem;
+}
+
+.chart-tooltip-item {
+  padding: 0.25rem 0;
+  color: #ccc;
+}
+
+.chart-tooltip-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+.chart-tooltip-close:hover {
+  color: #fff;
+}
+
+/* Time Period Selector */
+.time-period-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
+.time-period-selector label {
+  color: #f0f0f0;
+  font-size: 0.9rem;
+  margin: 0;
+  width: auto;
+}
+
+.period-select {
+  padding: 0.5rem 0.75rem;
+  background: #2a2a2a;
+  color: #f0f0f0;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  width: auto;
+  margin: 0;
+}
+
+.period-select:hover {
+  background: #333;
+}
+
+.calendar-btn {
+  padding: 0.5rem 0.75rem;
+  background: #1f6feb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  width: auto;
+  margin: 0;
+  transition: background 0.3s ease;
+}
+
+.calendar-btn:hover {
+  background: #265dbf;
+}
+
+.date-picker {
+  padding: 0.5rem;
+  background: #2a2a2a;
+  color: #f0f0f0;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  width: auto;
+  margin: 0;
+}
+
+/* Chart Legend */
+.chart-legend {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #242424;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+/* Expand Button */
+/* Expand Button - positioned just above chart canvas where grid lines start */
+.expand-btn {
+  position: absolute;
+  top: auto;
+  right: 1.75rem;
+  bottom: auto;
+  background: rgba(42, 42, 42, 0.95);
+  border: 1px solid #3a3a3a;
+  color: #f0f0f0;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  width: auto;
+  margin: 0;
+  line-height: 1;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.expand-btn:hover {
+  background: rgba(31, 111, 235, 0.95);
+  border-color: #1f6feb;
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(31, 111, 235, 0.3);
+}
+
+/* Fullscreen Mode */
+.chart-container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: #121212;
+  margin: 0;
+  border-radius: 0;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.chart-container.fullscreen .chartCanvas,
+.chart-container.fullscreen .interactiveChart {
+  height: calc(100vh - 250px) !important;
+  max-height: none !important;
+}
+
+.chart-container.fullscreen .expand-btn {
+  background: rgba(139, 0, 0, 0.95);
+  border-color: #8b0000;
+  top: 2rem !important;
+  right: 2rem;
+}
+
+.chart-container.fullscreen .expand-btn:hover {
+  background: rgba(160, 0, 0, 0.95);
+  border-color: #a00000;
+}
+
+.chart-container.fullscreen .expand-btn::before {
+  content: '✕ ';
+  margin-right: 0.25rem;
+}
+
+/* Hide scrollbar on body when fullscreen is active */
+body.fullscreen-active {
+  overflow: hidden;
+}
+
+.legend-title {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #8ecae6;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.legend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: #1e1e1e;
+  border-radius: 6px;
+  border-left: 4px solid;
+}
+
+.legend-item-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #f0f0f0;
+}
+
+.legend-color-box {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.legend-item-value {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .time-period-selector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .period-select,
+  .calendar-btn,
+  .date-picker {
+    width: 100%;
+  }
+  
+  .legend-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* Progress Analysis Section */
+.progress-analysis-section {
+  margin: 2rem 0;
+}
+
+.progress-analysis-section > h3 {
+  color: #fff;
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+}
+
+.pie-chart-container {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.pie-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pie-chart-header h4 {
+  color: #8ecae6;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.pieCanvas {
+  max-width: 400px;
+  max-height: 400px;
+  margin: 0 auto;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .pie-chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .pieCanvas {
+    max-width: 100%;
+    max-height: 300px;
+  }
+}
