@@ -295,6 +295,12 @@ if (addMealBtn) {
       return;
     }
 
+    // Validate no negative numbers
+    if (cals < 0 || prot < 0 || carb < 0 || fatVal < 0 || sug < 0 || vegCups < 0) {
+      alert('Please enter positive values only. Negative numbers are not allowed.');
+      return;
+    }
+
     const user = profiles[currentUser];
     if (!user) {
       console.error('User not found in profiles');
