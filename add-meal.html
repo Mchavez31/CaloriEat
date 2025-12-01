@@ -5,6 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Add Meal</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Selected Meal Display */
+    .selected-meal-display {
+      background: #2a2a2a;
+      border: 2px solid #1f6feb;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    
+    .selected-meal-display.active {
+      display: block;
+    }
+    
+    .selected-meal-label {
+      font-size: 0.85rem;
+      color: #8ecae6;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+    
+    .selected-meal-name {
+      font-size: 1.1rem;
+      color: #fff;
+      font-weight: 600;
+    }
+    
+    .clear-selection-btn {
+      background: #8b0000;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.75rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      width: auto;
+      display: inline-block;
+    }
+    
+    .clear-selection-btn:hover {
+      background: #a00000;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -33,8 +78,31 @@
   <main class="container">
     <h2>Add Meal</h2>
 
-    <label for="meal">Meal Name:</label>
-    <input type="text" id="meal" placeholder="e.g., Chicken Salad">
+    <!-- FOOD SEARCH BOX - NOW ALWAYS VISIBLE -->
+    <div id="foodSearchContainer">
+      <label for="foodSearchInput" style="color: #8ecae6; font-weight: bold; font-size: 0.95rem;">
+        🔍 Search Food Database <span id="foodSearchStatus" style="font-size: 0.85rem; color: #06d6a0; margin-left: 0.5rem;">(Loading...)</span>
+      </label>
+      <input 
+        type="text" 
+        id="foodSearchInput" 
+        placeholder="🔍 Search food database OR type meal name"
+        autocomplete="off"
+        style="display: block; width: 100%; margin-top: 0.5rem; padding: 0.5rem; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 5px; color: #f0f0f0; font-size: 0.9rem;"
+      />
+      <div id="foodSearchResults" style="max-height: 300px; overflow-y: auto; margin-top: 0.5rem; background: #2a2a2a; border-radius: 6px; display: none;"></div>
+      <p style="font-size: 0.8rem; color: #9e9e9e; font-style: italic; margin-top: 0.5rem;">💡 Tip: Search includes restaurant items from McDonald's, Subway, Chipotle, and more!</p>
+    </div>
+
+    <!-- Hidden field - filled by search box -->
+    <input type="hidden" id="meal">
+
+    <!-- SELECTED MEAL DISPLAY - Shows when food is selected from database -->
+    <div class="selected-meal-display" id="selectedMealDisplay">
+      <div class="selected-meal-label">✓ Selected Meal:</div>
+      <div class="selected-meal-name" id="selectedMealName"></div>
+      <button type="button" class="clear-selection-btn" id="clearSelectionBtn">✕ Clear Selection</button>
+    </div>
 
     <label>Meal Type:</label>
     <div class="inline-grid-2col" style="margin-bottom: 1rem;">
@@ -44,9 +112,7 @@
       <button type="button" class="meal-type-btn" data-type="snack">🍿 Snack</button>
     </div>
 
-    <label for="foodSearch">Search Food:</label>
-    <input type="text" id="foodSearch" placeholder="e.g., Apple, Rice, Burger">
-    <ul id="foodResults"></ul>
+   
 
     <label for="calories">Calories:</label>
     <input type="number" id="calories" placeholder="350">
@@ -89,6 +155,80 @@
     <div id="mealList" class="meal-list"></div>
   </main>
 
+  <script src="food-search-integration.js"></script>
   <script src="standalone-meal.js"></script>
+  <script>
+    // PREVENT DOUBLE SEARCH BOX CREATION
+    // Since we added the search box in HTML, prevent the JS from creating another one
+    if (window.FoodDatabase) {
+      // Override createFoodSearchUI to do nothing since we already have the UI
+      window.createFoodSearchUI = function() {
+        console.log('Search UI already exists in HTML, skipping creation');
+        // Just update the status
+        const statusEl = document.getElementById('foodSearchStatus');
+        if (statusEl && window.FoodDatabase.loaded) {
+          const stats = window.FoodDatabase.getStats();
+          statusEl.textContent = `(${stats.total} foods available)`;
+          statusEl.style.color = '#06d6a0';
+        }
+      };
+    }
+    
+    // ADD THIS SCRIPT TO HANDLE SELECTED MEAL DISPLAY
+    // This runs after both other scripts load
+    
+    // Function to show selected meal
+    function showSelectedMeal(mealName) {
+      const displayDiv = document.getElementById('selectedMealDisplay');
+      const nameDiv = document.getElementById('selectedMealName');
+      
+      if (displayDiv && nameDiv) {
+        nameDiv.textContent = mealName;
+        displayDiv.classList.add('active');
+      }
+    }
+    
+    // Function to clear selected meal
+    function clearSelectedMeal() {
+      const displayDiv = document.getElementById('selectedMealDisplay');
+      const nameDiv = document.getElementById('selectedMealName');
+      const mealInput = document.getElementById('meal');
+      
+      if (displayDiv) displayDiv.classList.remove('active');
+      if (nameDiv) nameDiv.textContent = '';
+      if (mealInput) mealInput.value = '';
+    }
+    
+    // Override the selectFood function to show the selected meal
+    const originalSelectFood = window.selectFood;
+    if (originalSelectFood) {
+      window.selectFood = function(foodId) {
+        originalSelectFood(foodId);
+        
+        // Get the meal name from the hidden input
+        const mealInput = document.getElementById('meal');
+        if (mealInput && mealInput.value) {
+          showSelectedMeal(mealInput.value);
+        }
+      };
+    }
+    
+    // Clear selection button
+    const clearBtn = document.getElementById('clearSelectionBtn');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', clearSelectedMeal);
+    }
+    
+    // Also clear when meal is successfully added
+    const originalRenderMeals = window.renderMeals;
+    if (originalRenderMeals) {
+      const addButton = document.getElementById('addMealBtn');
+      if (addButton) {
+        addButton.addEventListener('click', () => {
+          setTimeout(clearSelectedMeal, 500);
+        });
+      }
+    }
+  </script>
 </body>
 </html>

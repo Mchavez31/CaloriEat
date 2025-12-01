@@ -277,7 +277,10 @@ if (addMealBtn) {
     e.preventDefault();
     console.log('Add Meal clicked');
 
-    const mealName = mealInput.value.trim();
+    // Get meal name from search input OR hidden meal field
+    const searchInput = document.getElementById('foodSearchInput');
+    const mealName = mealInput ? mealInput.value.trim() : "";
+    
     const cals = calInput.value.trim();
     const prot = proteinInput.value.trim();
     const crbs = carbsInput.value.trim();
@@ -327,8 +330,9 @@ if (addMealBtn) {
     localStorage.setItem('profiles', JSON.stringify(profiles));
     console.log('Meal saved to localStorage');
 
-    // Clear inputs
-    mealInput.value = '';
+    // Clear all inputs including search box
+    if (searchInput) searchInput.value = '';
+    if (mealInput) mealInput.value = '';
     calInput.value = '';
     proteinInput.value = '';
     carbsInput.value = '';

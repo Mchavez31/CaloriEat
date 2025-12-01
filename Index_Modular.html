@@ -55,6 +55,37 @@
     </div>
   </div>
 
+  <!-- ENTER KEY FIX FOR LOGIN -->
+  <script>
+  // Allow Enter key to submit login
+  document.addEventListener('DOMContentLoaded', function() {
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    
+    // Press Enter on username -> move to password
+    if (usernameInput) {
+      usernameInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          passwordInput.focus();
+        }
+      });
+    }
+    
+    // Press Enter on password -> click login
+    if (passwordInput) {
+      passwordInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          loginBtn.click();
+        }
+      });
+    }
+  });
+  </script>
+
+
   <!-- RESET POPUP -->
   <div id="resetPopup" class="hidden popup-card">
     <h3>Reset Credentials</h3>
@@ -281,10 +312,17 @@
   </div>
 
   <!-- PROGRESS ANALYSIS SECTION -->
-  <div class="progress-analysis-section">
+  <div class="charts-section">
     <h3>Progress Analysis</h3>
     
-    <!-- Pie Chart 1: Macros Distribution -->
+<!-- 1) Calorie Intake Chart -->
+    <div class="chart-container" data-chart="calorie">
+      <h4>Calories Per Day</h4>
+      <span class="chart-hint">💡 Click on bars for details</span>
+      <button class="expand-btn" title="Expand to fullscreen">⛶</button>
+      <canvas id="calorieChart" class="chartCanvas"></canvas>
+    </div>
+
     <div class="pie-chart-container">
       <div class="pie-chart-header">
         <h4>Average Macros Distribution</h4>
@@ -300,55 +338,7 @@
       </div>
       <canvas id="macrosPieChart" class="pieCanvas"></canvas>
     </div>
-    
-    <!-- Pie Chart 2: Food Categories Distribution -->
-    <div class="pie-chart-container">
-      <div class="pie-chart-header">
-        <h4>Average Food Categories Distribution</h4>
-        <div class="time-period-selector">
-          <label>Period:</label>
-          <select id="categoriesPiePeriod" class="period-select">
-            <option value="day">Day</option>
-            <option value="week">Week</option>
-            <option value="month">Month</option>
-            <option value="year">Year</option>
-          </select>
-        </div>
-      </div>
-      <canvas id="categoriesPieChart" class="pieCanvas"></canvas>
-    </div>
-    
-    <!-- Pie Chart 3: Meal Type Calories Distribution -->
-    <div class="pie-chart-container">
-      <div class="pie-chart-header">
-        <h4>Average Calories by Meal Type</h4>
-        <div class="time-period-selector">
-          <label>Period:</label>
-          <select id="mealTypePiePeriod" class="period-select">
-            <option value="day">Day</option>
-            <option value="week">Week</option>
-            <option value="month">Month</option>
-            <option value="year">Year</option>
-          </select>
-        </div>
-      </div>
-      <canvas id="mealTypePieChart" class="pieCanvas"></canvas>
-    </div>
-  </div>
 
-  <!-- NEW: INTERACTIVE CHARTS SECTION -->
-  <div class="charts-section">
-    <h3>Progress Over Time</h3>
-    
-<!-- 1) Calorie Intake Chart -->
-    <div class="chart-container" data-chart="calorie">
-      <h4>Calories Per Day</h4>
-      <span class="chart-hint">💡 Click on bars for details</span>
-      <button class="expand-btn" title="Expand to fullscreen">⛶</button>
-      <canvas id="calorieChart" class="chartCanvas"></canvas>
-    </div>
-
-    <!-- 2) Macros & Sugar Chart -->
     <div class="chart-container" data-chart="macros">
       <div class="chart-header">
         <h4>Macros & Sugar (grams)</h4>
@@ -389,7 +379,22 @@
       <div id="macrosLegend" class="chart-legend"></div>
     </div>
 
-    <!-- 3) Meal Type Breakdown Chart -->
+    <div class="pie-chart-container">
+      <div class="pie-chart-header">
+        <h4>Average Calories by Meal Type</h4>
+        <div class="time-period-selector">
+          <label>Period:</label>
+          <select id="mealTypePiePeriod" class="period-select">
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+          </select>
+        </div>
+      </div>
+      <canvas id="mealTypePieChart" class="pieCanvas"></canvas>
+    </div>
+
     <div class="chart-container" data-chart="mealType">
       <div class="chart-header">
         <h4>Meal Type Breakdown Over Time</h4>
@@ -446,7 +451,22 @@
       <div id="mealTypeLegend" class="chart-legend"></div>
     </div>
 
-     <!-- 4) Food Categories Chart -->
+    <div class="pie-chart-container">
+      <div class="pie-chart-header">
+        <h4>Average Food Categories Distribution</h4>
+        <div class="time-period-selector">
+          <label>Period:</label>
+          <select id="categoriesPiePeriod" class="period-select">
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+          </select>
+        </div>
+      </div>
+      <canvas id="categoriesPieChart" class="pieCanvas"></canvas>
+    </div>
+
     <div class="chart-container" data-chart="categories">
       <div class="chart-header">
         <h4>Food Categories (% of Diet)</h4>
@@ -493,7 +513,6 @@
       <div id="categoriesLegend" class="chart-legend"></div>
     </div>
 
-    <!-- 5) Weight Chart -->
     <div class="chart-container" data-chart="weight">
       <h4>Weight Over Time</h4>
       <span class="chart-hint">💡 Click on lines for details</span>
@@ -503,7 +522,6 @@
   </div>
 </div>
 
-  <!-- ACCOUNT SECTION -->
   <div class="container hidden" id="accountSection">
     <h2>Your Account</h2>
 

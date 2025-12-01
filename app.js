@@ -1352,22 +1352,23 @@ function calculateAverageCalories(meals, period) {
   
   switch (period) {
     case 'day':
-      // Average calories per day
+      // Average calories per day (only days with meals)
       return totalCalories / dates.length;
       
     case 'week':
-      // Average calories per week
-      // Find the date range
-      const sortedDates = dates.map(d => new Date(d)).sort((a, b) => a - b);
-      const firstDate = sortedDates[0];
-      const lastDate = sortedDates[sortedDates.length - 1];
-      const daysDiff = Math.ceil((lastDate - firstDate) / (1000 * 60 * 60 * 24)) + 1;
-      const weeks = daysDiff / 7;
-      return totalCalories / Math.max(weeks, 1);
+      // Average calories per week (only weeks with meals)
+      // Group dates by week and count unique weeks
+      const weeksSet = new Set();
+      dates.forEach(date => {
+        const d = new Date(date);
+        const weekStart = new Date(d);
+        weekStart.setDate(d.getDate() - d.getDay()); // Start of week (Sunday)
+        weeksSet.add(weekStart.toLocaleDateString());
+      });
+      return totalCalories / weeksSet.size;
       
     case 'month':
-      // Average calories per month
-      // Group by month and count unique months
+      // Average calories per month (only months with meals)
       const monthsSet = new Set();
       dates.forEach(date => {
         const d = new Date(date);
@@ -1376,8 +1377,7 @@ function calculateAverageCalories(meals, period) {
       return totalCalories / monthsSet.size;
       
     case 'year':
-      // Average calories per year
-      // Group by year and count unique years
+      // Average calories per year (only years with meals)
       const yearsSet = new Set();
       dates.forEach(date => {
         const d = new Date(date);
@@ -1559,10 +1559,8 @@ function renderCategoriesPieChart() {
           callbacks: {
             label: function(context) {
               const label = context.label || '';
-              const value = context.parsed || 0;
-              const total = context.dataset.data.reduce((a, b) => a + b, 0);
-              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-              return `${label}: ${value.toFixed(1)} items (${percentage}%)`;
+              const percentage = context.parsed || 0;
+              return `${label}: ${percentage.toFixed(1)}% of meals`;
             }
           }
         }
@@ -1682,37 +1680,33 @@ function calculateMacrosAverages(meals, period) {
 
 // Calculate categories averages
 function calculateCategoriesAverages(meals, period) {
-  const mealsByPeriod = groupMealsByPeriod(meals, period);
-  const periods = Object.keys(mealsByPeriod);
-  
-  if (periods.length === 0) {
+  if (!meals || meals.length === 0) {
     return { veggies: 0, fruits: 0, wholeGrains: 0, leanProteins: 0, processedFoods: 0, sugaryFoods: 0 };
   }
   
+  // Count total meals in each category (across all meals, not grouped by period)
   let totalVeggies = 0, totalFruits = 0, totalGrains = 0, totalProteins = 0, totalProcessed = 0, totalSugary = 0;
   
-  periods.forEach(periodKey => {
-    const periodMeals = mealsByPeriod[periodKey];
-    periodMeals.forEach(meal => {
-      const category = categorizeMeal(meal.name);
-      if (category === 'veggies') totalVeggies++;
-      else if (category === 'fruits') totalFruits++;
-      else if (category === 'wholeGrains') totalGrains++;
-      else if (category === 'leanProteins') totalProteins++;
-      else if (category === 'processedFoods') totalProcessed++;
-      else if (category === 'sugaryFoods') totalSugary++;
-    });
+  meals.forEach(meal => {
+    const category = categorizeMeal(meal.name);
+    if (category === 'veggies') totalVeggies++;
+    else if (category === 'fruits') totalFruits++;
+    else if (category === 'wholeGrains') totalGrains++;
+    else if (category === 'leanProteins') totalProteins++;
+    else if (category === 'processedFoods') totalProcessed++;
+    else if (category === 'sugaryFoods') totalSugary++;
   });
   
-  const numPeriods = periods.length;
+  const totalMeals = meals.length;
   
+  // Return percentages of total meals
   return {
-    veggies: totalVeggies / numPeriods,
-    fruits: totalFruits / numPeriods,
-    wholeGrains: totalGrains / numPeriods,
-    leanProteins: totalProteins / numPeriods,
-    processedFoods: totalProcessed / numPeriods,
-    sugaryFoods: totalSugary / numPeriods
+    veggies: totalMeals > 0 ? (totalVeggies / totalMeals) * 100 : 0,
+    fruits: totalMeals > 0 ? (totalFruits / totalMeals) * 100 : 0,
+    wholeGrains: totalMeals > 0 ? (totalGrains / totalMeals) * 100 : 0,
+    leanProteins: totalMeals > 0 ? (totalProteins / totalMeals) * 100 : 0,
+    processedFoods: totalMeals > 0 ? (totalProcessed / totalMeals) * 100 : 0,
+    sugaryFoods: totalMeals > 0 ? (totalSugary / totalMeals) * 100 : 0
   };
 }
 
@@ -1907,13 +1901,26 @@ function getDateLabelsForPeriod(meals, period, selectedDate) {
   
   switch (period) {
     case 'weekly':
-      return getWeekDates(selectedDate);
+      // Only return dates from the week that actually have meals
+      const weekDates = getWeekDates(selectedDate);
+      const mealDatesInWeek = new Set(meals.map(m => m.date));
+      return weekDates.filter(date => mealDatesInWeek.has(date));
       
     case 'monthly':
-      return getMonthDates(selectedDate.getFullYear(), selectedDate.getMonth());
+      // Only return dates from the month that actually have meals
+      const monthDates = getMonthDates(selectedDate.getFullYear(), selectedDate.getMonth());
+      const mealDatesInMonth = new Set(meals.map(m => m.date));
+      return monthDates.filter(date => mealDatesInMonth.has(date));
       
     case 'yearly':
-      return getYearMonths(selectedDate.getFullYear());
+      // Only return months that actually have meals
+      const allMonths = getYearMonths(selectedDate.getFullYear());
+      const mealsGroupedByMonth = {};
+      meals.forEach(meal => {
+        const monthLabel = getMonthLabel(meal.date);
+        mealsGroupedByMonth[monthLabel] = true;
+      });
+      return allMonths.filter(month => mealsGroupedByMonth[month]);
       
     default:
       const dateSet = new Set();
@@ -2931,9 +2938,17 @@ function renderCaloriesChart(dates, dataByDate) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      onClick: (event, activeElements) => {
-        if (activeElements.length > 0) {
-          const index = activeElements[0].index;
+      onClick: (event, activeElements, chart) => {
+        // Use 'index' mode to get entire vertical slice - perfect for bars!
+        const items = chart.getElementsAtEventForMode(
+          event,
+          'index',
+          { intersect: false },
+          false
+        );
+        
+        if (items && items.length > 0) {
+          const index = items[0].index;
           const date = dates[index];
           const total = dataByDate[date].calories;
           const meals = dataByDate[date].meals;
@@ -2950,7 +2965,7 @@ function renderCaloriesChart(dates, dataByDate) {
           });
           
           content += '</div>';
-          showChartTooltip(event.native || event, content);
+          showChartTooltip(event, content);
         }
       },
       scales: { 
@@ -3050,154 +3065,142 @@ function renderMacrosChart(filteredDates, filteredDataByDate) {
       responsive: true,
       maintainAspectRatio: false,
       onClick: (event, activeElements, chart) => {
-        // Get the canvas element and its bounding rect
-        const canvas = chart.canvas;
-        const rect = canvas.getBoundingClientRect();
+        // Get all points at the click location using different modes
+        const nearestPoints = chart.getElementsAtEventForMode(
+          event,
+          'nearest',
+          { intersect: false },
+          false
+        );
         
-        // Get native event for click coordinates
-        const nativeEvent = event.native || event;
+        if (!nearestPoints || nearestPoints.length === 0) return;
         
-        // Calculate click position accounting for canvas scaling
-        // Chart.js internal coordinates account for devicePixelRatio
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
+        // Chart.js already calculated the correct position - use event.x and event.y
+        // These are in canvas pixel coordinates
+        const clickX = event.x;
+        const clickY = event.y;
         
-        const clickX = (nativeEvent.clientX - rect.left) * scaleX;
-        const clickY = (nativeEvent.clientY - rect.top) * scaleY;
+        // Find the X index by getting the closest point's index
+        const xIndex = nearestPoints[0].index;
         
-        let closestElement = null;
-        let minDistance = Infinity;
-        const maxClickRadius = 50; // Scaled pixels - detection radius
+        // Now find which dataset's point at this X index is closest to the click Y
+        let closestDatasetIndex = -1;
+        let minYDistance = Infinity;
         
-        // Manually search all visible datasets for the closest point
-        chart.data.datasets.forEach((dataset, datasetIndex) => {
-          // Skip hidden datasets
-          if (dataset.hidden) return;
+        for (let datasetIndex = 0; datasetIndex < chart.data.datasets.length; datasetIndex++) {
+          const dataset = chart.data.datasets[datasetIndex];
+          if (dataset.hidden) continue;
           
           const meta = chart.getDatasetMeta(datasetIndex);
-          if (!meta || !meta.data) return;
+          if (!meta || !meta.data || !meta.data[xIndex]) continue;
           
-          meta.data.forEach((point, pointIndex) => {
-            if (!point || typeof point.x === 'undefined' || typeof point.y === 'undefined') return;
-            
-            // Calculate Euclidean distance from click to this point
-            const dx = point.x - clickX;
-            const dy = point.y - clickY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            // Track closest point within radius
-            if (distance < maxClickRadius && distance < minDistance) {
-              minDistance = distance;
-              closestElement = {
-                datasetIndex: datasetIndex,
-                index: pointIndex,
-                distance: distance
-              };
-            }
-          });
-        });
+          const point = meta.data[xIndex];
+          const yDistance = Math.abs(clickY - point.y);
+          
+          if (yDistance < minYDistance) {
+            minYDistance = yDistance;
+            closestDatasetIndex = datasetIndex;
+          }
+        }
         
-        // If we found a close enough point, show the tooltip
-        if (closestElement && minDistance < maxClickRadius) {
-          const datasetIndex = closestElement.datasetIndex;
-          const index = closestElement.index;
+        if (closestDatasetIndex === -1) return;
+        
+        const index = xIndex;
+        const datasetIndex = closestDatasetIndex;
+        const dataset = chart.data.datasets[datasetIndex];
+        
+        const metric = dataset.metric;
+        const metricLabel = dataset.label;
+        const dateLabel = filteredDates[index];
+        const dateData = filteredDataByDate[dateLabel];
+        
+        if (!dateData) return;
+        
+        // For yearly view with mealsByDate, show weekly breakdown
+        let content = '';
+        if (macrosTimePeriod === 'yearly' && dateData.mealsByDate) {
+          // Get all dates in this month and organize by week
+          const datesInMonth = Object.keys(dateData.mealsByDate).sort((a, b) => new Date(a) - new Date(b));
           
-          // Get the actual dataset that was clicked
-          const dataset = macrosChartInstance.data.datasets[datasetIndex];
-          
-          const metric = dataset.metric;
-          const metricLabel = dataset.label;
-          const dateLabel = filteredDates[index];
-          const dateData = filteredDataByDate[dateLabel];
-          
-          if (!dateData) return;
-          
-          // For yearly view with mealsByDate, show weekly breakdown
-          let content = '';
-          if (macrosTimePeriod === 'yearly' && dateData.mealsByDate) {
-            // Get all dates in this month and organize by week
-            const datesInMonth = Object.keys(dateData.mealsByDate).sort((a, b) => new Date(a) - new Date(b));
-            
-            if (datesInMonth.length === 0) {
-              content = `
-                <div class="chart-tooltip-header">📅 ${dateLabel}</div>
-                <div class="chart-tooltip-total">📊 ${metricLabel}: 0g (0 Items)</div>
-                <div class="chart-tooltip-breakdown">No data for this month</div>
-              `;
-            } else {
-              // Calculate weekly totals and counts
-              const weeklyTotals = { week1: 0, week2: 0, week3: 0, week4: 0 };
-              const weeklyCounts = { week1: 0, week2: 0, week3: 0, week4: 0 };
-              
-              datesInMonth.forEach(date => {
-                const dayData = dateData.mealsByDate[date];
-                const dayValue = dayData[metric] || 0;
-                const dayCount = dayData.counts?.[metric] || 0;
-                const day = new Date(date).getDate();
-                
-                if (day <= 7) {
-                  weeklyTotals.week1 += dayValue;
-                  weeklyCounts.week1 += dayCount;
-                } else if (day <= 14) {
-                  weeklyTotals.week2 += dayValue;
-                  weeklyCounts.week2 += dayCount;
-                } else if (day <= 21) {
-                  weeklyTotals.week3 += dayValue;
-                  weeklyCounts.week3 += dayCount;
-                } else {
-                  weeklyTotals.week4 += dayValue;
-                  weeklyCounts.week4 += dayCount;
-                }
-              });
-              
-              // Show monthly total and weekly breakdown
-              const total = dateData[metric] || 0;
-              const totalCount = dateData.counts?.[metric] || 0;
-              content = `
-                <div class="chart-tooltip-header">📅 ${dateLabel}</div>
-                <div class="chart-tooltip-total">📊 ${metricLabel}: ${total.toFixed(1)}g (${totalCount} Items)</div>
-                <div class="chart-tooltip-breakdown">
-                  <strong>📋 Weekly Breakdown:</strong><br>
-              `;
-              
-              if (weeklyTotals.week1 > 0) content += `<div class="chart-tooltip-item">• Week 1: ${weeklyTotals.week1.toFixed(1)}g (${weeklyCounts.week1} Items)</div>`;
-              if (weeklyTotals.week2 > 0) content += `<div class="chart-tooltip-item">• Week 2: ${weeklyTotals.week2.toFixed(1)}g (${weeklyCounts.week2} Items)</div>`;
-              if (weeklyTotals.week3 > 0) content += `<div class="chart-tooltip-item">• Week 3: ${weeklyTotals.week3.toFixed(1)}g (${weeklyCounts.week3} Items)</div>`;
-              if (weeklyTotals.week4 > 0) content += `<div class="chart-tooltip-item">• Week 4: ${weeklyTotals.week4.toFixed(1)}g (${weeklyCounts.week4} Items)</div>`;
-              
-              content += '</div>';
-            }
-          } else {
-            // For non-yearly views, show individual day breakdown
-            const total = dateData[metric] || 0;
-            const totalCount = dateData.counts?.[metric] || 0;
-            const meals = dateData.meals || [];
-            
+          if (datesInMonth.length === 0) {
             content = `
               <div class="chart-tooltip-header">📅 ${dateLabel}</div>
-              <div class="chart-tooltip-total">📊 ${metricLabel}: ${total.toFixed(1)}g (${totalCount} Items)</div>
-              <div class="chart-tooltip-breakdown">
-                <strong>📋 Breakdown:</strong><br>
+              <div class="chart-tooltip-total">📊 ${metricLabel}: 0g (0 Servings)</div>
+              <div class="chart-tooltip-breakdown">No data for this month</div>
             `;
+          } else {
+            // Calculate weekly totals and counts
+            const weeklyTotals = { week1: 0, week2: 0, week3: 0, week4: 0 };
+            const weeklyCounts = { week1: 0, week2: 0, week3: 0, week4: 0 };
             
-            let hasValues = false;
-            meals.forEach(meal => {
-              const value = meal[metric] || 0;
-              if (value > 0) {
-                content += `<div class="chart-tooltip-item">• ${meal.name}: ${value.toFixed(1)}g</div>`;
-                hasValues = true;
+            datesInMonth.forEach(date => {
+              const dayData = dateData.mealsByDate[date];
+              const dayValue = dayData[metric] || 0;
+              const dayCount = dayData.counts?.[metric] || 0;
+              const day = new Date(date).getDate();
+              
+              if (day <= 7) {
+                weeklyTotals.week1 += dayValue;
+                weeklyCounts.week1 += dayCount;
+              } else if (day <= 14) {
+                weeklyTotals.week2 += dayValue;
+                weeklyCounts.week2 += dayCount;
+              } else if (day <= 21) {
+                weeklyTotals.week3 += dayValue;
+                weeklyCounts.week3 += dayCount;
+              } else {
+                weeklyTotals.week4 += dayValue;
+                weeklyCounts.week4 += dayCount;
               }
             });
             
-            if (!hasValues) {
-              content += `<div class="chart-tooltip-item">(No ${metricLabel.toLowerCase()} logged for this day)</div>`;
-            }
+            // Show monthly total and weekly breakdown
+            const total = dateData[metric] || 0;
+            const totalCount = dateData.counts?.[metric] || 0;
+            content = `
+              <div class="chart-tooltip-header">📅 ${dateLabel}</div>
+              <div class="chart-tooltip-total">📊 ${metricLabel}: ${total.toFixed(1)}g (${totalCount} Servings)</div>
+              <div class="chart-tooltip-breakdown">
+                <strong>📋 Weekly Breakdown:</strong><br>
+            `;
+            
+            if (weeklyTotals.week1 > 0) content += `<div class="chart-tooltip-item">• Week 1: ${weeklyTotals.week1.toFixed(1)}g (${weeklyCounts.week1} Servings)</div>`;
+            if (weeklyTotals.week2 > 0) content += `<div class="chart-tooltip-item">• Week 2: ${weeklyTotals.week2.toFixed(1)}g (${weeklyCounts.week2} Servings)</div>`;
+            if (weeklyTotals.week3 > 0) content += `<div class="chart-tooltip-item">• Week 3: ${weeklyTotals.week3.toFixed(1)}g (${weeklyCounts.week3} Servings)</div>`;
+            if (weeklyTotals.week4 > 0) content += `<div class="chart-tooltip-item">• Week 4: ${weeklyTotals.week4.toFixed(1)}g (${weeklyCounts.week4} Servings)</div>`;
             
             content += '</div>';
           }
+        } else {
+          // For non-yearly views, show individual day breakdown
+          const total = dateData[metric] || 0;
+          const totalCount = dateData.counts?.[metric] || 0;
+          const meals = dateData.meals || [];
           
-          showChartTooltip(nativeEvent, content);
+          content = `
+            <div class="chart-tooltip-header">📅 ${dateLabel}</div>
+            <div class="chart-tooltip-total">📊 ${metricLabel}: ${total.toFixed(1)}g (${totalCount} Servings)</div>
+            <div class="chart-tooltip-breakdown">
+              <strong>📋 Breakdown:</strong><br>
+          `;
+          
+          let hasValues = false;
+          meals.forEach(meal => {
+            const value = meal[metric] || 0;
+            if (value > 0) {
+              content += `<div class="chart-tooltip-item">• ${meal.name}: ${value.toFixed(1)}g</div>`;
+              hasValues = true;
+            }
+          });
+          
+          if (!hasValues) {
+            content += `<div class="chart-tooltip-item">(No ${metricLabel.toLowerCase()} logged for this day)</div>`;
+          }
+          
+          content += '</div>';
         }
+        
+        showChartTooltip(event, content);
       },
       interaction: {
         mode: 'index',
@@ -3402,62 +3405,46 @@ function renderFoodCategoriesChart(filteredDates, filteredDataByDate) {
       responsive: true,
       maintainAspectRatio: false,
       onClick: (event, activeElements, chart) => {
-        // SIMPLIFIED CLICK HANDLER FOR CATEGORIES CHART
-        console.log('Categories chart clicked'); // Debug log
+        const nearestPoints = chart.getElementsAtEventForMode(
+          event,
+          'nearest',
+          { intersect: false },
+          false
+        );
         
-        // Get canvas and coordinates
-        const canvas = chart.canvas;
-        const rect = canvas.getBoundingClientRect();
-        const nativeEvent = event.native || event;
+        if (!nearestPoints || nearestPoints.length === 0) return;
         
-        // Calculate scaled coordinates
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const clickX = (nativeEvent.clientX - rect.left) * scaleX;
-        const clickY = (nativeEvent.clientY - rect.top) * scaleY;
+        // Use Chart.js's internal coordinates
+        const clickX = event.x;
+        const clickY = event.y;
         
-        console.log(`Click at: ${clickX}, ${clickY}`); // Debug log
+        // Find the X index
+        const xIndex = nearestPoints[0].index;
         
-        // Find closest point
-        let closestPoint = null;
-        let minDist = Infinity;
+        // Find which dataset's point at this X index is closest to the click Y
+        let closestDatasetIndex = -1;
+        let minYDistance = Infinity;
         
-        for (let dsIndex = 0; dsIndex < chart.data.datasets.length; dsIndex++) {
-          const dataset = chart.data.datasets[dsIndex];
+        for (let datasetIndex = 0; datasetIndex < chart.data.datasets.length; datasetIndex++) {
+          const dataset = chart.data.datasets[datasetIndex];
           if (dataset.hidden) continue;
           
-          const meta = chart.getDatasetMeta(dsIndex);
-          if (!meta || !meta.data) continue;
+          const meta = chart.getDatasetMeta(datasetIndex);
+          if (!meta || !meta.data || !meta.data[xIndex]) continue;
           
-          for (let ptIndex = 0; ptIndex < meta.data.length; ptIndex++) {
-            const point = meta.data[ptIndex];
-            if (!point || point.x === undefined || point.y === undefined) continue;
-            
-            const dx = point.x - clickX;
-            const dy = point.y - clickY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            
-            if (dist < minDist) {
-              minDist = dist;
-              closestPoint = {
-                datasetIndex: dsIndex,
-                pointIndex: ptIndex,
-                distance: dist
-              };
-            }
+          const point = meta.data[xIndex];
+          const yDistance = Math.abs(clickY - point.y);
+          
+          if (yDistance < minYDistance) {
+            minYDistance = yDistance;
+            closestDatasetIndex = datasetIndex;
           }
         }
         
-        console.log(`Closest point found at distance: ${minDist}`); // Debug log
+        if (closestDatasetIndex === -1) return;
         
-        // If click is within 50 pixels of a point, show tooltip
-        if (!closestPoint || minDist > 50) {
-          console.log('No point close enough'); // Debug log
-          return;
-        }
-        
-        const dsIdx = closestPoint.datasetIndex;
-        const ptIdx = closestPoint.pointIndex;
+        const dsIdx = closestDatasetIndex;
+        const ptIdx = xIndex;
         const dataset = chart.data.datasets[dsIdx];
         const category = dataset.category;
         const categoryLabel = dataset.label;
@@ -3465,21 +3452,11 @@ function renderFoodCategoriesChart(filteredDates, filteredDataByDate) {
         const percentage = parseFloat(dataset.data[ptIdx]);
         const dateData = filteredDataByDate[dateLabel];
         
-        console.log(`Showing tooltip for ${categoryLabel} on ${dateLabel}`); // Debug log
-        
-        if (!dateData) {
-          console.log('No date data found'); // Debug log
-          return;
-        }
+        if (!dateData) return;
         
         let tooltipHTML = '';
-        
-        // Check if this is yearly view with monthly data
         if (categoriesTimePeriod === 'yearly' && dateData.mealsByDate) {
-          // YEARLY VIEW - Show weekly percentages that add up to monthly total
           const dates = Object.keys(dateData.mealsByDate).sort((a, b) => new Date(a) - new Date(b));
-          
-          // Track category calories and counts by week
           const weeklyCategoryCals = { w1: 0, w2: 0, w3: 0, w4: 0 };
           const weeklyCategoryCounts = { w1: 0, w2: 0, w3: 0, w4: 0 };
           let monthlyTotalCals = 0;
@@ -3493,66 +3470,40 @@ function renderFoodCategoriesChart(filteredDates, filteredDataByDate) {
             const catCals = dayMeals.filter(m => categorizeMeal(m.name) === category).reduce((s, m) => s + (m.calories || 0), 0);
             const catCount = dd.categoryCounts?.[category] || 0;
             const day = new Date(d).getDate();
-            
             monthlyTotalCals += dayTotal;
             monthlyCategoryCals += catCals;
             monthlyCategoryCount += catCount;
-            
-            if (day <= 7) {
-              weeklyCategoryCals.w1 += catCals;
-              weeklyCategoryCounts.w1 += catCount;
-            } else if (day <= 14) {
-              weeklyCategoryCals.w2 += catCals;
-              weeklyCategoryCounts.w2 += catCount;
-            } else if (day <= 21) {
-              weeklyCategoryCals.w3 += catCals;
-              weeklyCategoryCounts.w3 += catCount;
-            } else {
-              weeklyCategoryCals.w4 += catCals;
-              weeklyCategoryCounts.w4 += catCount;
-            }
+            if (day <= 7) { weeklyCategoryCals.w1 += catCals; weeklyCategoryCounts.w1 += catCount; }
+            else if (day <= 14) { weeklyCategoryCals.w2 += catCals; weeklyCategoryCounts.w2 += catCount; }
+            else if (day <= 21) { weeklyCategoryCals.w3 += catCals; weeklyCategoryCounts.w3 += catCount; }
+            else { weeklyCategoryCals.w4 += catCals; weeklyCategoryCounts.w4 += catCount; }
           });
           
-          tooltipHTML = `
-            <div class="chart-tooltip-header">📅 ${dateLabel}</div>
-            <div class="chart-tooltip-total">📊 ${categoryLabel}: ${monthlyCategoryCals}cal (${percentage.toFixed(1)}%, ${monthlyCategoryCount} Items)</div>
-            <div class="chart-tooltip-breakdown"><strong>📋 Weekly:</strong><br>`;
-          
-          // Calculate each week as percentage of monthly total
+          tooltipHTML = `<div class="chart-tooltip-header">📅 ${dateLabel}</div><div class="chart-tooltip-total">📊 ${categoryLabel}: ${monthlyCategoryCals}cal (${percentage.toFixed(1)}%, ${monthlyCategoryCount} Servings)</div><div class="chart-tooltip-breakdown"><strong>📋 Weekly:</strong><br>`;
           if (monthlyTotalCals > 0) {
             ['w1', 'w2', 'w3', 'w4'].forEach((w, i) => {
               if (weeklyCategoryCals[w] > 0) {
                 const weekPct = (weeklyCategoryCals[w] / monthlyTotalCals * 100).toFixed(1);
-                tooltipHTML += `<div class="chart-tooltip-item">• Week ${i+1}: ${weekPct}% (${weeklyCategoryCounts[w]} Items)</div>`;
+                tooltipHTML += `<div class="chart-tooltip-item">• Week ${i+1}: ${weekPct}% (${weeklyCategoryCounts[w]} Servings)</div>`;
               }
             });
           }
-          
           tooltipHTML += '</div>';
         } else {
-          // NON-YEARLY VIEW - Show individual foods
           const meals = dateData.meals || [];
           const catMeals = meals.filter(m => categorizeMeal(m.name) === category);
           const catCals = catMeals.reduce((s, m) => s + (m.calories || 0), 0);
           const catCount = dateData.categoryCounts?.[category] || catMeals.length;
-          
-          tooltipHTML = `
-            <div class="chart-tooltip-header">📅 ${dateLabel}</div>
-            <div class="chart-tooltip-total">📊 ${categoryLabel}: ${catCals}cal (${percentage.toFixed(1)}%, ${catCount} Items)</div>
-            <div class="chart-tooltip-breakdown"><strong>📋 Breakdown:</strong><br>`;
-          
+          tooltipHTML = `<div class="chart-tooltip-header">📅 ${dateLabel}</div><div class="chart-tooltip-total">📊 ${categoryLabel}: ${catCals}cal (${percentage.toFixed(1)}%, ${catCount} Servings)</div><div class="chart-tooltip-breakdown"><strong>📋 Breakdown:</strong><br>`;
           if (catMeals.length > 0) {
-            catMeals.forEach(m => {
-              tooltipHTML += `<div class="chart-tooltip-item">• ${m.name}: ${m.calories} cal</div>`;
-            });
+            catMeals.forEach(m => tooltipHTML += `<div class="chart-tooltip-item">• ${m.name}: ${m.calories || 0}cal</div>`);
           } else {
-            tooltipHTML += `<div class="chart-tooltip-item">(No ${categoryLabel.toLowerCase()})</div>`;
+            tooltipHTML += `<div class="chart-tooltip-item">(No ${categoryLabel.toLowerCase()} logged)</div>`;
           }
-          
           tooltipHTML += '</div>';
         }
         
-        showChartTooltip(nativeEvent, tooltipHTML);
+        showChartTooltip(event, tooltipHTML);
       },
       interaction: {
         mode: 'nearest',
@@ -3756,237 +3707,148 @@ function renderMealTypeChart(filteredDates, filteredDataByDate) {
         }
       },
       onClick: (event, elements, chart) => {
-        // Get the canvas and calculate properly scaled coordinates
-        const canvas = chart.canvas;
-        const rect = canvas.getBoundingClientRect();
-        const nativeEvent = event.native || event;
+        const nearestPoints = chart.getElementsAtEventForMode(
+          event,
+          'nearest',
+          { intersect: false },
+          false
+        );
         
-        // Account for canvas scaling
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const clickX = (nativeEvent.clientX - rect.left) * scaleX;
-        const clickY = (nativeEvent.clientY - rect.top) * scaleY;
+        if (!nearestPoints || nearestPoints.length === 0) return;
         
-        let closestElement = null;
-        let minDistance = Infinity;
-        const maxClickRadius = 50;
+        // Use Chart.js's internal coordinates
+        const clickX = event.x;
+        const clickY = event.y;
         
-        // Manually find closest point
-        chart.data.datasets.forEach((dataset, datasetIndex) => {
-          if (dataset.hidden) return;
+        // Find the X index
+        const xIndex = nearestPoints[0].index;
+        
+        // Find which dataset's point at this X index is closest to the click Y
+        let closestDatasetIndex = -1;
+        let minYDistance = Infinity;
+        
+        for (let datasetIndex = 0; datasetIndex < chart.data.datasets.length; datasetIndex++) {
+          const dataset = chart.data.datasets[datasetIndex];
+          if (dataset.hidden) continue;
           
           const meta = chart.getDatasetMeta(datasetIndex);
-          if (!meta || !meta.data) return;
+          if (!meta || !meta.data || !meta.data[xIndex]) continue;
           
-          meta.data.forEach((point, pointIndex) => {
-            if (!point || typeof point.x === 'undefined' || typeof point.y === 'undefined') return;
-            
-            const dx = point.x - clickX;
-            const dy = point.y - clickY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            if (distance < maxClickRadius && distance < minDistance) {
-              minDistance = distance;
-              closestElement = { datasetIndex, index: pointIndex };
-            }
-          });
-        });
-        
-        if (closestElement) {
-          const datasetIndex = closestElement.datasetIndex;
-          const index = closestElement.index;
-          const dataset = mealTypeChartInstance.data.datasets[datasetIndex];
-          const dateLabel = mealTypeChartInstance.data.labels[index];
-          const value = dataset.data[index];
-          const mealType = dataset.label.toLowerCase().replace('🌅 ', '').replace('☀️ ', '').replace('🌙 ', '').replace('🍿 ', '');
+          const point = meta.data[xIndex];
+          const yDistance = Math.abs(clickY - point.y);
           
-          // Determine unit based on metric
-          let unit = 'g';
-          if (mealTypeMetric === 'calories' || mealTypeMetric === 'grains' || mealTypeMetric === 'processedFoods' || mealTypeMetric === 'veggies' || mealTypeMetric === 'fruits') {
-            unit = 'cal';
+          if (yDistance < minYDistance) {
+            minYDistance = yDistance;
+            closestDatasetIndex = datasetIndex;
           }
-          
-          let content = '';
-          
-          // For yearly view, show weekly breakdown
-          if (mealTypeTimePeriod === 'yearly' && filteredDataByDate[dateLabel] && filteredDataByDate[dateLabel][mealType].mealsByDate) {
-            const datesInMonth = Object.keys(filteredDataByDate[dateLabel][mealType].mealsByDate).sort((a, b) => new Date(a) - new Date(b));
-            
-            // Calculate weekly totals for this meal type
+        }
+        
+        if (closestDatasetIndex === -1) return;
+        
+        const datasetIndex = closestDatasetIndex;
+        const index = xIndex;
+        const dataset = chart.data.datasets[datasetIndex];
+        const dateLabel = filteredDates[index];
+        const value = dataset.data[index];
+        
+        // Extract meal type from label (Breakfast, Lunch, Dinner, Snack) and ensure lowercase
+        const mealType = dataset.label.toLowerCase().trim();
+        
+        let unit = 'g';
+        if (mealTypeMetric === 'calories' || mealTypeMetric === 'grains' || mealTypeMetric === 'processedFoods' || mealTypeMetric === 'veggies' || mealTypeMetric === 'fruits') {
+          unit = 'cal';
+        }
+        
+        let content = '';
+        
+        if (mealTypeTimePeriod === 'yearly' && filteredDataByDate[dateLabel] && filteredDataByDate[dateLabel][mealType] && filteredDataByDate[dateLabel][mealType].mealsByDate) {
+          const dates = Object.keys(filteredDataByDate[dateLabel][mealType].mealsByDate).sort((a, b) => new Date(a) - new Date(b));
+          if (dates.length === 0) {
+            content = `<div class="chart-tooltip-header">📅 ${dateLabel}</div><div class="chart-tooltip-total">📊 ${dataset.label}: 0${unit} (0 Servings)</div><div class="chart-tooltip-breakdown">No data</div>`;
+          } else {
             const weeklyTotals = { week1: 0, week2: 0, week3: 0, week4: 0 };
             const weeklyCounts = { week1: 0, week2: 0, week3: 0, week4: 0 };
-            const weeklyCups = { week1: 0, week2: 0, week3: 0, week4: 0 };
-            const weeklyGrams = { week1: 0, week2: 0, week3: 0, week4: 0 };
             
-            datesInMonth.forEach(date => {
+            dates.forEach(date => {
               const dayData = filteredDataByDate[dateLabel][mealType].mealsByDate[date];
               let dayValue = 0;
-              
-              if (mealTypeMetric === 'veggies') {
-                dayValue = dayData.veggiesCal || 0;
-              } else if (mealTypeMetric === 'fruits') {
-                dayValue = dayData.fruitsCal || 0;
-              } else {
-                dayValue = dayData[mealTypeMetric] || 0;
-              }
-              
+              if (mealTypeMetric === 'veggies') dayValue = dayData.veggiesCal || 0;
+              else if (mealTypeMetric === 'fruits') dayValue = dayData.fruitsCal || 0;
+              else dayValue = dayData[mealTypeMetric] || 0;
               const dayCount = dayData.count || 0;
               const day = new Date(date).getDate();
-              
               const weekKey = day <= 7 ? 'week1' : day <= 14 ? 'week2' : day <= 21 ? 'week3' : 'week4';
               weeklyTotals[weekKey] += dayValue;
               weeklyCounts[weekKey] += dayCount;
-              
-              if (mealTypeMetric === 'veggies') {
-                weeklyCups[weekKey] += dayData.veggieCups || 0;
-                weeklyGrams[weekKey] += dayData.veggieGrams || 0;
-              } else if (mealTypeMetric === 'fruits') {
-                weeklyCups[weekKey] += dayData.fruitsCups || 0;
-                weeklyGrams[weekKey] += dayData.fruitsGrams || 0;
-              } else if (mealTypeMetric === 'grains') {
-                weeklyCups[weekKey] += dayData.grainsCups || 0;
-                weeklyGrams[weekKey] += dayData.grainsGrams || 0;
-              }
             });
             
-            // Format header based on metric type
-            let totalDisplay = '';
-            if (mealTypeMetric === 'veggies') {
-              const monthData = filteredDataByDate[dateLabel][mealType];
-              totalDisplay = `${value.toFixed(1)} ${unit} (${monthData.count || 0} Items, ${(monthData.veggieCups || 0).toFixed(1)}cups, ${Math.round(monthData.veggieGrams || 0)}g)`;
-            } else if (mealTypeMetric === 'fruits') {
-              const monthData = filteredDataByDate[dateLabel][mealType];
-              totalDisplay = `${value.toFixed(1)} ${unit} (${monthData.count || 0} Items, ${(monthData.fruitsCups || 0).toFixed(1)}cups, ${Math.round(monthData.fruitsGrams || 0)}g)`;
-            } else if (mealTypeMetric === 'grains' || mealTypeMetric === 'processedFoods') {
-              const monthData = filteredDataByDate[dateLabel][mealType];
-              const extraInfo = mealTypeMetric === 'grains' && monthData.grainsCups 
-                ? `, ${(monthData.grainsCups || 0).toFixed(1)}cups, ${Math.round(monthData.grainsGrams || 0)}g`
-                : '';
-              totalDisplay = `${value.toFixed(1)} ${unit} (${monthData.count || 0} Items${extraInfo})`;
-            } else {
-              const monthData = filteredDataByDate[dateLabel][mealType];
-              totalDisplay = `${value.toFixed(1)} ${unit} (${monthData.count || 0} Items)`;
-            }
+            const monthData = filteredDataByDate[dateLabel][mealType];
+            let total = 0;
+            if (mealTypeMetric === 'veggies') total = monthData.veggiesCal || 0;
+            else if (mealTypeMetric === 'fruits') total = monthData.fruitsCal || 0;
+            else total = monthData[mealTypeMetric] || 0;
             
-            content = `
-              <div class="chart-tooltip-header">${dateLabel} - ${dataset.label}</div>
-              <div class="chart-tooltip-total">${totalDisplay}</div>
-              <div class="chart-tooltip-breakdown">
-                <strong>📋 Weekly Breakdown:</strong><br>
-            `;
-            
+            content = `<div class="chart-tooltip-header">📅 ${dateLabel}</div><div class="chart-tooltip-total">📊 ${dataset.label}: ${total.toFixed(1)}${unit} (${monthData.count || 0} Servings)</div><div class="chart-tooltip-breakdown"><strong>📋 Weekly:</strong><br>`;
             ['week1', 'week2', 'week3', 'week4'].forEach((w, i) => {
-              if (weeklyTotals[w] > 0) {
-                let weekDisplay = '';
-                if (mealTypeMetric === 'veggies' || mealTypeMetric === 'fruits') {
-                  weekDisplay = `${weeklyTotals[w].toFixed(1)} ${unit} (${weeklyCounts[w]} Items, ${weeklyCups[w].toFixed(1)}cups, ${Math.round(weeklyGrams[w])}g)`;
-                } else if (mealTypeMetric === 'grains' || mealTypeMetric === 'processedFoods') {
-                  const extraInfo = (mealTypeMetric === 'grains' && weeklyCups[w] > 0) 
-                    ? `, ${weeklyCups[w].toFixed(1)}cups, ${Math.round(weeklyGrams[w])}g`
-                    : '';
-                  weekDisplay = `${weeklyTotals[w].toFixed(1)} ${unit} (${weeklyCounts[w]} Items${extraInfo})`;
-                } else {
-                  weekDisplay = `${weeklyTotals[w].toFixed(1)} ${unit} (${weeklyCounts[w]} Items)`;
-                }
-                content += `<div class="chart-tooltip-item">• Week ${i+1}: ${weekDisplay}</div>`;
-              }
+              if (weeklyTotals[w] > 0) content += `<div class="chart-tooltip-item">• Week ${i+1}: ${weeklyTotals[w].toFixed(1)}${unit} (${weeklyCounts[w]} Servings)</div>`;
             });
-            
             content += '</div>';
+          }
+        } else {
+          const dateData = filteredDataByDate[dateLabel];
+          if (!dateData) {
+            content = `<div class="chart-tooltip-header">📅 ${dateLabel}</div><div class="chart-tooltip-total">No data</div>`;
           } else {
-            // For non-yearly views, show meal breakdown
-            const dateData = filteredDataByDate[dateLabel];
-            if (!dateData) {
-              content = `
-                <div class="chart-tooltip-header">${dateLabel} - ${dataset.label}</div>
-                <div class="chart-tooltip-total">${value.toFixed(1)} ${unit}</div>
-              `;
+            // Data is structured as dateData[mealType] with meals array and totals
+            const mealTypeData = dateData[mealType];
+            if (!mealTypeData) {
+              content = `<div class="chart-tooltip-header">📅 ${dateLabel}</div><div class="chart-tooltip-total">📊 ${dataset.label}: 0${unit} (0 Servings)</div>`;
             } else {
-              const mealTypeKey = mealType.toLowerCase();
-              const meals = dateData[mealTypeKey]?.meals || [];
-              const itemCount = dateData[mealTypeKey]?.count || meals.length;
+              const meals = mealTypeData.meals || [];
+              let total = 0;
               
-              // Format header based on metric
-              let totalDisplay = '';
-              if (mealTypeMetric === 'veggies') {
-                const mData = dateData[mealTypeKey];
-                totalDisplay = `${value.toFixed(1)} ${unit} (${itemCount} Items, ${(mData.veggieCups || 0).toFixed(1)}cups, ${Math.round(mData.veggieGrams || 0)}g)`;
-              } else if (mealTypeMetric === 'fruits') {
-                const mData = dateData[mealTypeKey];
-                totalDisplay = `${value.toFixed(1)} ${unit} (${itemCount} Items, ${(mData.fruitsCups || 0).toFixed(1)}cups, ${Math.round(mData.fruitsGrams || 0)}g)`;
-              } else if (mealTypeMetric === 'grains' || mealTypeMetric === 'processedFoods') {
-                const mData = dateData[mealTypeKey];
-                const extraInfo = (mealTypeMetric === 'grains' && mData.grainsCups) 
-                  ? `, ${(mData.grainsCups || 0).toFixed(1)}cups, ${Math.round(mData.grainsGrams || 0)}g`
-                  : '';
-                totalDisplay = `${value.toFixed(1)} ${unit} (${itemCount} Items${extraInfo})`;
-              } else {
-                totalDisplay = `${value.toFixed(1)} ${unit} (${itemCount} Items)`;
-              }
+              // Get the total based on the metric
+              if (mealTypeMetric === 'calories') total = mealTypeData.calories || 0;
+              else if (mealTypeMetric === 'veggies') total = mealTypeData.veggiesCal || 0;
+              else if (mealTypeMetric === 'fruits') total = mealTypeData.fruitsCal || 0;
+              else if (mealTypeMetric === 'grains') total = mealTypeData.grains || 0;
+              else if (mealTypeMetric === 'processedFoods') total = mealTypeData.processedFoods || 0;
+              else total = mealTypeData[mealTypeMetric] || 0;
               
-              content = `
-                <div class="chart-tooltip-header">${dateLabel} - ${dataset.label}</div>
-                <div class="chart-tooltip-total">${totalDisplay}</div>
-                <div class="chart-tooltip-breakdown">
-                  <strong>📋 Breakdown:</strong><br>
-              `;
+              const count = mealTypeData.count || 0;
+              
+              content = `<div class="chart-tooltip-header">📅 ${dateLabel}</div><div class="chart-tooltip-total">📊 ${dataset.label}: ${total.toFixed(1)}${unit} (${count} Servings)</div><div class="chart-tooltip-breakdown"><strong>📋 Meals:</strong><br>`;
               
               if (meals.length > 0) {
-                // For category-based metrics (fruits, grains, processedFoods), show relevant meals
-                if (mealTypeMetric === 'fruits') {
-                  const fruitMeals = meals.filter(m => categorizeMeal(m.name) === 'fruits');
-                  fruitMeals.forEach(meal => {
-                    content += `<div class="chart-tooltip-item">• ${meal.name}: ${meal.calories} cal</div>`;
-                  });
-                  if (fruitMeals.length === 0) {
-                    content += `<div class="chart-tooltip-item">(No fruits logged)</div>`;
+                meals.forEach(m => {
+                  let val = 0;
+                  if (mealTypeMetric === 'calories') val = m.calories || 0;
+                  else if (mealTypeMetric === 'veggies') val = m.veggieCalories || m.veggies || 0;
+                  else if (mealTypeMetric === 'fruits') {
+                    const cat = categorizeMeal(m.name);
+                    val = (cat === 'fruits') ? (m.calories || 0) : 0;
                   }
-                } else if (mealTypeMetric === 'veggies') {
-                  const veggieMeals = meals.filter(m => categorizeMeal(m.name) === 'veggies');
-                  veggieMeals.forEach(meal => {
-                    const veggieInfo = meal.veggieCups 
-                      ? `${meal.veggieCalories || 0} cal (${meal.veggieCups}c, ${meal.veggieGrams}g)`
-                      : `${meal.veggieCalories || 0} cal`;
-                    content += `<div class="chart-tooltip-item">• ${meal.name}: ${veggieInfo}</div>`;
-                  });
-                  if (veggieMeals.length === 0) {
-                    content += `<div class="chart-tooltip-item">(No veggies logged)</div>`;
+                  else if (mealTypeMetric === 'grains') {
+                    const cat = categorizeMeal(m.name);
+                    val = (cat === 'wholeGrains') ? (m.calories || 0) : 0;
                   }
-                } else if (mealTypeMetric === 'grains') {
-                  const grainMeals = meals.filter(m => categorizeMeal(m.name) === 'wholeGrains');
-                  grainMeals.forEach(meal => {
-                    content += `<div class="chart-tooltip-item">• ${meal.name}: ${meal.calories} cal</div>`;
-                  });
-                  if (grainMeals.length === 0) {
-                    content += `<div class="chart-tooltip-item">(No grains logged)</div>`;
+                  else if (mealTypeMetric === 'processedFoods') {
+                    const cat = categorizeMeal(m.name);
+                    val = (cat === 'processedFoods') ? (m.calories || 0) : 0;
                   }
-                } else if (mealTypeMetric === 'processedFoods') {
-                  const processedMeals = meals.filter(m => categorizeMeal(m.name) === 'processedFoods');
-                  processedMeals.forEach(meal => {
-                    content += `<div class="chart-tooltip-item">• ${meal.name}: ${meal.calories} cal</div>`;
-                  });
-                  if (processedMeals.length === 0) {
-                    content += `<div class="chart-tooltip-item">(No processed foods logged)</div>`;
-                  }
-                } else {
-                  // For regular metrics (calories, protein, carbs, fat, sugar)
-                  meals.forEach(meal => {
-                    const mealValue = meal[mealTypeMetric] || 0;
-                    if (mealValue > 0) {
-                      content += `<div class="chart-tooltip-item">• ${meal.name}: ${mealValue.toFixed(1)} ${unit}</div>`;
-                    }
-                  });
-                }
+                  else val = m[mealTypeMetric] || 0;
+                  
+                  if (val > 0) content += `<div class="chart-tooltip-item">• ${m.name}: ${val.toFixed(1)}${unit}</div>`;
+                });
               } else {
-                content += `<div class="chart-tooltip-item">(No meals logged)</div>`;
+                content += `<div class="chart-tooltip-item">(No ${mealType} meals logged)</div>`;
               }
-              
-              content += '</div>';
             }
+            content += '</div>';
           }
-          
-          showChartTooltip(nativeEvent, content);
         }
+        
+        showChartTooltip(event, content);
       }
     }
   });
@@ -4105,38 +3967,110 @@ function renderWeightChart(user) {
     weightVals.push(user.weightLbs || 0);
   }
 
+  // Calculate projected weight using linear regression
+  const projectedWeights = [];
+  if (weightVals.length >= 2) {
+    // Convert dates to numeric values (days since first weight)
+    const firstDate = new Date(weightDates[0]);
+    const xValues = weightDates.map(d => {
+      const currentDate = new Date(d);
+      return Math.floor((currentDate - firstDate) / (1000 * 60 * 60 * 24));
+    });
+    
+    // Calculate linear regression: y = mx + b
+    const n = xValues.length;
+    const sumX = xValues.reduce((a, b) => a + b, 0);
+    const sumY = weightVals.reduce((a, b) => a + b, 0);
+    const sumXY = xValues.reduce((sum, x, i) => sum + x * weightVals[i], 0);
+    const sumX2 = xValues.reduce((sum, x) => sum + x * x, 0);
+    
+    const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    
+    // Generate projected values for existing dates
+    xValues.forEach(x => {
+      projectedWeights.push(slope * x + intercept);
+    });
+    
+    // Add 30 days of future projections
+    const lastX = xValues[xValues.length - 1];
+    for (let i = 1; i <= 30; i++) {
+      const futureX = lastX + i;
+      const projectedWeight = slope * futureX + intercept;
+      projectedWeights.push(projectedWeight);
+      
+      // Add future date label
+      const futureDate = new Date(weightDates[weightDates.length - 1]);
+      futureDate.setDate(futureDate.getDate() + i);
+      weightDates.push(futureDate.toLocaleDateString());
+    }
+  }
+
+  const datasets = [{
+    label: 'Weight (lbs)',
+    data: weightVals,
+    borderColor: '#8ecae6',
+    backgroundColor: 'rgba(142, 202, 230, 0.1)',
+    borderWidth: 3,
+    pointRadius: 3,
+    pointHoverRadius: 5,
+    fill: true,
+    tension: 0.3
+  }];
+  
+  // Add projected weight dataset if we have projections
+  if (projectedWeights.length > 0) {
+    datasets.push({
+      label: 'Projected Weight (lbs)',
+      data: projectedWeights,
+      borderColor: '#ffbe0b',
+      backgroundColor: 'rgba(255, 190, 11, 0.05)',
+      borderWidth: 2,
+      pointRadius: 0,
+      pointHoverRadius: 3,
+      fill: false,
+      tension: 0.1,
+      borderDash: [5, 5]
+    });
+  }
+
   const wtCtx = wtChartEl.getContext('2d');
   weightChartInstance = new Chart(wtCtx, {
     type: 'line',
     data: {
       labels: weightDates,
-      datasets: [{
-        label: 'Weight (lbs)',
-        data: weightVals,
-        borderColor: '#8ecae6',
-        backgroundColor: 'rgba(142, 202, 230, 0.1)',
-        borderWidth: 3,
-        pointRadius: 3,
-        pointHoverRadius: 5,
-        fill: true,
-        tension: 0.3
-      }]
+      datasets: datasets
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      onClick: (event, activeElements) => {
-        if (activeElements.length > 0) {
-          const index = activeElements[0].index;
+      onClick: (event, activeElements, chart) => {
+        // Use nearest mode with x-axis for reliable line point detection
+        const points = chart.getElementsAtEventForMode(
+          event,
+          'nearest',
+          { axis: 'x', intersect: false },
+          false
+        );
+        
+        if (points && points.length > 0) {
+          const index = points[0].index;
+          const datasetIndex = points[0].datasetIndex;
           const date = weightDates[index];
-          const weight = weightVals[index];
           
-          let content = `
-            <div class="chart-tooltip-header">📅 ${date}</div>
-            <div class="chart-tooltip-total">⚖️ Weight: ${weight} lbs</div>
-          `;
+          let content = `<div class="chart-tooltip-header">📅 ${date}</div>`;
           
-          showChartTooltip(event.native || event, content);
+          if (datasetIndex === 0 && index < weightVals.length) {
+            // Actual weight
+            const weight = weightVals[index];
+            content += `<div class="chart-tooltip-total">⚖️ Weight: ${weight} lbs</div>`;
+          } else if (datasetIndex === 1 && index < projectedWeights.length) {
+            // Projected weight
+            const projWeight = projectedWeights[index].toFixed(1);
+            content += `<div class="chart-tooltip-total">📈 Projected: ${projWeight} lbs</div>`;
+          }
+          
+          showChartTooltip(event, content);
         }
       },
       interaction: {
@@ -4149,7 +4083,7 @@ function renderWeightChart(user) {
           labels: { color: '#f0f0f0' }
         },
         tooltip: {
-          enabled: false // Disable hover tooltips
+          enabled: false
         }
       },
       scales: { 
