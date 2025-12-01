@@ -907,3 +907,41 @@ body.fullscreen-active {
     max-height: 300px;
   }
 }
+
+/* ============================================
+   FIREFOX-SPECIFIC FIXES
+   Added to resolve display issues in Firefox
+   ============================================ */
+
+/* Fix button overlap in chart controls */
+@supports (-moz-appearance:none) {
+  .chart-header {
+    gap: 0.75rem !important;
+    flex-wrap: wrap !important;
+  }
+  
+  .chart-controls {
+    gap: 0.75rem !important;
+    flex-wrap: wrap !important;
+    justify-content: center;
+  }
+  
+  .toggle-btn {
+    font-size: 0.8rem !important;
+    padding: 0.4rem 0.6rem !important;
+    margin: 0.25rem !important;
+    white-space: nowrap;
+  }
+  
+  .expand-btn {
+    right: 1.5rem !important;
+    top: 1.5rem !important;
+  }
+}
+
+/* Improve text rendering in Firefox */
+@-moz-document url-prefix() {
+  body, button, input, select, textarea {
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
