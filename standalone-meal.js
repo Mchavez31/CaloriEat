@@ -301,6 +301,12 @@ if (addMealBtn) {
       return;
     }
 
+    // Validate meal type is selected
+    if (!selectedMealType) {
+      alert('Please select a meal type (Breakfast, Lunch, Dinner, or Snack)');
+      return;
+    }
+
     // Validate no negative numbers
     const calNum = parseFloat(cals) || 0;
     const protNum = parseFloat(prot) || 0;

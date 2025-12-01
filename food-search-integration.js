@@ -477,10 +477,11 @@ function selectFood(foodId) {
     resultsContainer.classList.remove('active');
   }
   
-  // Clear search input
+  // Keep the food name visible in search box
+  // This way if validation fails, user can see what they selected
   const searchInput = document.getElementById('foodSearchInput');
   if (searchInput) {
-    searchInput.value = '';
+    searchInput.value = food.name; // Keep food name visible
   }
   
   // Show success message
