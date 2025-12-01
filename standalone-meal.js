@@ -279,7 +279,13 @@ if (addMealBtn) {
 
     // Get meal name from search input OR hidden meal field
     const searchInput = document.getElementById('foodSearchInput');
-    const mealName = mealInput ? mealInput.value.trim() : "";
+    // FIXED: Check search input first (for manual entry), then hidden field (for database selection)
+    let mealName = '';
+    if (searchInput && searchInput.value.trim()) {
+      mealName = searchInput.value.trim();
+    } else if (mealInput && mealInput.value.trim()) {
+      mealName = mealInput.value.trim();
+    }
     
     const cals = calInput.value.trim();
     const prot = proteinInput.value.trim();
@@ -296,7 +302,14 @@ if (addMealBtn) {
     }
 
     // Validate no negative numbers
-    if (cals < 0 || prot < 0 || carb < 0 || fatVal < 0 || sug < 0 || vegCups < 0) {
+    const calNum = parseFloat(cals) || 0;
+    const protNum = parseFloat(prot) || 0;
+    const carbsNum = parseFloat(crbs) || 0;
+    const fatNum = parseFloat(ft) || 0;
+    const sugarNum = parseFloat(sgr) || 0;
+    const vegCupsNum = parseFloat(vegCups) || 0;
+    
+    if (calNum < 0 || protNum < 0 || carbsNum < 0 || fatNum < 0 || sugarNum < 0 || vegCupsNum < 0) {
       alert('Please enter positive values only. Negative numbers are not allowed.');
       return;
     }
@@ -332,6 +345,7 @@ if (addMealBtn) {
 
     console.log('Creating meal:', newMeal);
     user.meals.push(newMeal);
+    console.log(`Total meals now: ${user.meals.length}`);
 
     localStorage.setItem('profiles', JSON.stringify(profiles));
     console.log('Meal saved to localStorage');
@@ -352,7 +366,9 @@ if (addMealBtn) {
     mealTypeButtons.forEach(b => b.classList.remove('selected'));
 
     alert('Meal added successfully!');
+    console.log('About to render meals...');
     renderMeals();
+    console.log('Meals rendered!');
   });
 } else {
   console.error('addMealBtn not found!');
