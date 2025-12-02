@@ -56,6 +56,7 @@ const menuIcon = document.getElementById('menuIcon');
 const menuDropdown = document.getElementById('menuDropdown');
 const menuLogout = document.getElementById('menuLogout');
 const mealInput = document.getElementById('meal');
+const mealDateInput = document.getElementById('mealDate');
 const calInput = document.getElementById('calories');
 const proteinInput = document.getElementById('protein');
 const carbsInput = document.getElementById('carbs');
@@ -122,9 +123,9 @@ function calculateVeggieServings(cups, totalCalories) {
   // Calculate expected veggie calories
   const expectedVeggieCals = grams * VEGGIE_CALORIES_PER_GRAM;
   
-  // Servings = veggie calories / 100 (assuming 1 serving ≈ 100 calories of veggies)
-  // This is a rough estimate to track veggie intake
-  const servings = expectedVeggieCals / 100;
+  // FIXED: 1 cup = 1 serving (simple and user-friendly)
+  // Users think in cups/servings, not calorie-based calculations
+  const servings = cups;
   
   return {
     servings: Math.round(servings * 10) / 10, // Round to 1 decimal
@@ -137,6 +138,21 @@ function calculateVeggieServings(cups, totalCalories) {
 if (veggiesInput) {
   veggiesInput.addEventListener('input', updateVeggieGrams);
 }
+
+// Set default date to today on page load
+function setDefaultMealDate() {
+  if (mealDateInput) {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    mealDateInput.value = `${year}-${month}-${day}`;
+    console.log('Default date set to:', mealDateInput.value);
+  }
+}
+
+// Initialize default date
+setDefaultMealDate();
 
 // Menu toggle
 if (menuIcon) {
@@ -334,6 +350,18 @@ if (addMealBtn) {
     const veggieCups = parseFloat(vegCups) || 0;
     const veggieData = calculateVeggieServings(veggieCups, parseFloat(cals));
 
+    // Get meal date - use selected date or default to today
+    let mealDate;
+    if (mealDateInput && mealDateInput.value) {
+      // Convert date input format (YYYY-MM-DD) to local date string
+      const dateObj = new Date(mealDateInput.value + 'T00:00:00');
+      mealDate = dateObj.toLocaleDateString();
+      console.log('Using selected date:', mealDate);
+    } else {
+      mealDate = todayStr();
+      console.log('Using today\'s date:', mealDate);
+    }
+
     const newMeal = {
       name: mealName,
       calories: parseInt(cals),
@@ -345,7 +373,7 @@ if (addMealBtn) {
       veggieCups: veggieCups, // Store original cups input
       veggieGrams: veggieData.grams, // Store grams for display
       veggieCalories: veggieData.calories, // Store veggie calories
-      date: todayStr(),
+      date: mealDate,
       mealType: selectedMealType
     };
 
@@ -366,6 +394,9 @@ if (addMealBtn) {
     sugarInput.value = '';
     veggiesInput.value = '';
     updateVeggieGrams();
+    
+    // Reset date to today
+    setDefaultMealDate();
     
     // Clear meal type selection
     selectedMealType = null;

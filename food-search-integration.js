@@ -463,6 +463,7 @@ function selectFood(foodId) {
   const carbsInput = document.getElementById('carbs');
   const fatInput = document.getElementById('fat');
   const sugarInput = document.getElementById('sugar');
+  const veggiesInput = document.getElementById('veggies');
   
   if (mealInput) mealInput.value = food.name;
   if (caloriesInput) caloriesInput.value = Math.round(food.calories);
@@ -470,6 +471,24 @@ function selectFood(foodId) {
   if (carbsInput) carbsInput.value = food.carbs.toFixed(1);
   if (fatInput) fatInput.value = food.fat.toFixed(1);
   if (sugarInput) sugarInput.value = food.sugar.toFixed(1);
+  
+  // AUTO-FILL VEGGIES: If food is in "veggies" category, auto-fill 1 serving
+  if (veggiesInput && food.category === 'veggies') {
+    veggiesInput.value = '1';
+    
+    // Trigger the veggie grams display update
+    const event = new Event('input', { bubbles: true });
+    veggiesInput.dispatchEvent(event);
+    
+    console.log('✓ Auto-filled veggies: 1 serving (food is a vegetable)');
+  } else if (veggiesInput) {
+    // Clear veggies if not a vegetable
+    veggiesInput.value = '';
+    
+    // Trigger the veggie grams display update
+    const event = new Event('input', { bubbles: true });
+    veggiesInput.dispatchEvent(event);
+  }
   
   // Close search results
   const resultsContainer = document.getElementById('foodSearchResults');
@@ -484,8 +503,12 @@ function selectFood(foodId) {
     searchInput.value = food.name; // Keep food name visible
   }
   
-  // Show success message
-  showNotification(`✓ Auto-filled: ${food.name}`, 'success');
+  // Show success message with veggie info
+  let message = `✓ Auto-filled: ${food.name}`;
+  if (food.category === 'veggies') {
+    message += ' (1 veggie serving)';
+  }
+  showNotification(message, 'success');
   
   // Log category for debugging
   console.log('Category:', food.category, '-', getCategoryDisplayName(food.category));
